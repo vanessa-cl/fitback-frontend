@@ -34,13 +34,13 @@ const Home = () => {
       path: "/consultar-clientes",
       color: theme.palette.primary.main
     },
-    {
+    /*{
       title: "Perguntas",
       description: "Gerencie as perguntas do sistema",
       icon: <Quiz sx={{ fontSize: 40 }} />,
       path: "/gerenciar-perguntas",
       color: theme.palette.success.main
-    },
+    },*/
     {
       title: "Questionarios",
       description: "Crie e gerencie questionários",
@@ -48,13 +48,13 @@ const Home = () => {
       path: "/consultar-questionario",
       color: theme.palette.warning.main
     },
-    {
+    /*{
       title: "Dashboard",
       description: "Visualize relatórios e métricas",
       icon: <Dashboard sx={{ fontSize: 40 }} />,
       path: "/example",
       color: theme.palette.info.main
-    }
+    }*/
   ];
 
   return (
