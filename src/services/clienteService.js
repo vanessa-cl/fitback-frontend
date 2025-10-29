@@ -14,6 +14,9 @@ class ClienteService extends ApiService {
   }
 
   createCliente(clienteData) {
+    clienteData.senha_hash = clienteData.senha;
+    delete clienteData.senha;
+    delete clienteData.confirmarSenha;
     return this.post("/", clienteData);
   }
 

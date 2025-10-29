@@ -4,53 +4,96 @@ import { usePageTitle } from "../../../context/PageTitleContext.jsx";
 import * as S from "./RegisterClient.styles.js";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
+import clienteService from "../../../services/clienteService.js";
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
 
 const INITIAL_FORM_STATE = {
-  firstName: "",
-  lastName: "",
+  nome: "",
   cpf: "",
-  registration: "",
+  matricula: "",
   email: "",
-  phone: "",
-  password: "",
-  confirmPassword: "",
+  telefone: "",
+  senha: "",
+  confirmarSenha: "",
 };
 
 const RegisterClient = () => {
   const [formClient, setFormClient] = useState(INITIAL_FORM_STATE);
   const { setTitle } = usePageTitle();
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "",
+  });
 
   useEffect(() => {
     setTitle("Cadastrar Cliente");
   }, [setTitle]);
 
+  const checkFormValidity = () => {
+    return (
+      Object.values(formClient).every((value) => value.trim() !== "") &&
+      formClient.senha === formClient.confirmarSenha
+    );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await clienteService
+      .createCliente(formClient)
+      .then((response) => {
+        setFormClient(INITIAL_FORM_STATE);
+        setSnackbar({
+          open: true,
+          message: "Cliente cadastrado com sucesso!",
+          severity: "success",
+        });
+      })
+      .catch((error) => {
+        setSnackbar({
+          open: true,
+          message: error.response.data.message || "Erro ao cadastrar cliente",
+          severity: "error",
+        });
+      });
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   return (
     <div>
-      <S.RegisterClientForm>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+      <S.RegisterClientForm onSubmit={handleSubmit}>
         <S.FormGrid>
           <TextField
-            id="first-name-input"
-            name="first-name-input"
-            value={formClient.firstName}
-            className="first-name-input"
+            id="name-input"
+            name="name-input"
+            value={formClient.nome}
+            className="name-input"
             onChange={(e) =>
-              setFormClient({ ...formClient, firstName: e.target.value })
+              setFormClient({ ...formClient, nome: e.target.value })
             }
-            label="Nome*"
+            label="Nome"
             variant="outlined"
             margin="normal"
-          />
-          <TextField
-            id="last-name-input"
-            name="last-name-input"
-            value={formClient.lastName}
-            className="last-name-input"
-            onChange={(e) =>
-              setFormClient({ ...formClient, lastName: e.target.value })
-            }
-            label="Sobrenome*"
-            variant="outlined"
-            margin="normal"
+            required
           />
           <TextField
             id="cpf-input"
@@ -59,20 +102,22 @@ const RegisterClient = () => {
             onChange={(e) =>
               setFormClient({ ...formClient, cpf: e.target.value })
             }
-            label="CPF*"
+            label="CPF"
             variant="outlined"
             margin="normal"
+            required
           />
           <TextField
             id="registration-input"
             name="registration-input"
-            value={formClient.registration}
+            value={formClient.matricula}
             onChange={(e) =>
-              setFormClient({ ...formClient, registration: e.target.value })
+              setFormClient({ ...formClient, matricula: e.target.value })
             }
-            label="Matrícula*"
+            label="Matrícula"
             variant="outlined"
             margin="normal"
+            required
           />
           <TextField
             id="email-input"
@@ -81,44 +126,48 @@ const RegisterClient = () => {
             onChange={(e) =>
               setFormClient({ ...formClient, email: e.target.value })
             }
-            label="Email*"
+            label="Email"
             variant="outlined"
             margin="normal"
+            required
           />
           <TextField
             id="phone-input"
             name="phone-input"
-            value={formClient.phone}
+            value={formClient.telefone}
             onChange={(e) =>
-              setFormClient({ ...formClient, phone: e.target.value })
+              setFormClient({ ...formClient, telefone: e.target.value })
             }
-            label="Telefone*"
+            label="Telefone"
             variant="outlined"
             margin="normal"
+            required
           />
           <TextField
             id="password-input"
             name="password-input"
             type="password"
-            value={formClient.password}
+            value={formClient.senha}
             onChange={(e) =>
-              setFormClient({ ...formClient, password: e.target.value })
+              setFormClient({ ...formClient, senha: e.target.value })
             }
-            label="Senha*"
+            label="Senha"
             variant="outlined"
             margin="normal"
+            required
           />
           <TextField
             id="confirm-password-input"
             name="confirm-password-input"
             type="password"
-            value={formClient.confirmPassword}
+            value={formClient.confirmarSenha}
             onChange={(e) =>
-              setFormClient({ ...formClient, confirmPassword: e.target.value })
+              setFormClient({ ...formClient, confirmarSenha: e.target.value })
             }
-            label="Repita a Senha*"
+            label="Repita a Senha"
             variant="outlined"
             margin="normal"
+            required
           />
         </S.FormGrid>
         <S.ActionRow>
@@ -129,7 +178,14 @@ const RegisterClient = () => {
           >
             Voltar
           </Button>
-          <Button startIcon={<AddIcon />} variant="contained" color="primary">
+          <Button
+            startIcon={<AddIcon />}
+            variant="contained"
+            color="primary"
+            disabled={!checkFormValidity()}
+            type="submit"
+            onClick={handleSubmit}
+          >
             Cadastrar
           </Button>
         </S.ActionRow>

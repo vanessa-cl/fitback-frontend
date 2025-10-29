@@ -16,12 +16,11 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { data, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import EditClientModal from "../EditClient/EditClientModal.jsx";
 import InactivateClientModal from "../InactivateClient/InactivateClientModal.jsx";
 import clienteService from "../../../services/clienteService.js";
 import Alert from "@mui/material/Alert";
-import Stack from "@mui/material/Stack";
 
 const rows = [
   {
