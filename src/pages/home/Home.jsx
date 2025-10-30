@@ -44,7 +44,7 @@ const Home = () => {
       disabled: true // Desabilitado
     },
     {
-      title: "Questionarios",
+      title: "Questionários",
       description: "Crie e gerencie questionários",
       icon: <Assignment sx={{ fontSize: 40 }} />,
       path: "/consultar-questionario",

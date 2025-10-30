@@ -336,7 +336,6 @@ const QuestionnaireList = () => {
           </Grid>
         </Grid>
 
-        {/* Coluna dos Controles (Pesquisa e Botões) */}
         <Grid item xs={12} lg={3}>
           <Box
             sx={{
@@ -346,7 +345,6 @@ const QuestionnaireList = () => {
               justifyContent: "space-between",
             }}
           >
-            {/* Botões Acima do Input de Pesquisa */}
             <Box
               sx={{
                 display: "flex",
