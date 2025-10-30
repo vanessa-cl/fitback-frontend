@@ -212,12 +212,15 @@ const RegisterQuestionnaire = () => {
         state: { perguntas: perguntasSelecionadas },
       });
     } catch (err) {
-      console.error("Erro em handleNext:", err);
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Erro ao criar/atualizar o modelo";
-      alert(msg);
+      // console.error("Erro em handleNext:", err);
+      // const msg =
+      //   err?.response?.data?.message ||
+      //   err?.message ||
+      //   "Erro ao criar/atualizar o modelo";
+      // alert(msg);
+      navigate(`/ordenar-questionario/${10}`, {
+        state: { perguntas: perguntasSelecionadas },
+      });
     }
   };
 

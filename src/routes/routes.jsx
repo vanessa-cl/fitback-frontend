@@ -2,16 +2,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomeLayout from "../layouts/HomeLayout.jsx";
 import DefaultLayout from "../layouts/DefaultLayout.jsx";
 import Home from "../pages/home/Home.jsx";
-import Example from "../pages/Example/Example.jsx";
 import RegisterClient from "../pages/Clients/RegisterClient/RegisterClient.jsx";
 import ConsultClients from "../pages/Clients/ConsultClients/ConsultClients.jsx";
 import ListCategories from "../pages/Categories/ListCategories.jsx";
-import RegisterCategory from "../pages/Categories/RegisterCategory.jsx"; 
-import Login from '../pages/Auth/Login.jsx';
-import QuestionnaireList from '../pages/Questionnaire/QuestionnaireList.jsx';
-import QuestionManagement from '../pages/Questions/QuestionManagement.jsx';
-import RegisterQuestionnaire from '../pages/Questionnaire/RegisterQuestionnaire/RegisterQuestionnaire.jsx';
-import QuestionnaireOrder from '../pages/Questionnaire/QuestionnaireOrder/QuestionnaireOrder.jsx';
+import RegisterCategory from "../pages/Categories/RegisterCategory.jsx";
+import Login from "../pages/Auth/Login.jsx";
+import QuestionnaireList from "../pages/Questionnaire/ConsultQuestionnaire/QuestionnaireList.jsx";
+import RegisterQuestionnaire from "../pages/Questionnaire/RegisterQuestionnaire/RegisterQuestionnaire.jsx";
+import QuestionnaireOrder from "../pages/Questionnaire/QuestionnaireOrder/QuestionnaireOrder.jsx";
 
 // import Login from '../pages/Auth/Login.jsx';
 // import Register from '../pages/Auth/Register.jsx';
@@ -31,21 +29,24 @@ const Router = () => {
 
         <Route element={<DefaultLayout />}>
           <Route path="/app" element={<Home />} />
-          <Route path="/example" element={<Example />} />
           <Route path="/consultar-clientes" element={<ConsultClients />} />
           <Route path="/cadastrar-cliente" element={<RegisterClient />} />
-
-          <Route path="/cadastrar-categoria" element={<Example />} />
-          <Route path="/consultar-categorias" element={<Example />} />
-          
-          <Route path="/consultar-categorias" element={<ListCategories />} />
-          <Route path="/cadastrar-categoria" element={<RegisterCategory />} />
-
-          <Route path="/consultar-questionario" element={<QuestionnaireList />} />
-          <Route path="/cadastrar-questionario" element={<RegisterQuestionnaire />} />
-          <Route path="/editar-questionario/:id" element={<RegisterQuestionnaire />} />
-          <Route path="/ordenar-questionario/:id" element={<QuestionnaireOrder />} />
-          <Route path="/gerenciar-perguntas" element={<QuestionManagement />} />
+          <Route
+            path="/consultar-questionario"
+            element={<QuestionnaireList />}
+          />
+          <Route
+            path="/cadastrar-questionario"
+            element={<RegisterQuestionnaire />}
+          />
+          <Route
+            path="/editar-questionario/:id"
+            element={<RegisterQuestionnaire />}
+          />
+          <Route
+            path="/ordenar-questionario/:id"
+            element={<QuestionnaireOrder />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

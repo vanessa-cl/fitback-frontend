@@ -37,7 +37,7 @@ import {
   Warning as WarningIcon,
 } from "@mui/icons-material";
 
-import { usePageTitle } from "../../context/PageTitleContext.jsx";
+import { usePageTitle } from "../../../context/PageTitleContext.jsx";
 
 // Componente Modal de Exclusão
 const ModalDeleteQuestionnaire = ({
@@ -154,7 +154,7 @@ const QuestionnaireList = () => {
       codigo: "1",
       categoria: "Funcionários",
       descricao: "Avaliar a satisfação geral dos clientes",
-      dataCriacao: "2025-01-24",
+      dataCriacao: "2025-10-24",
       status: "Ativo",
     },
     {
@@ -162,7 +162,7 @@ const QuestionnaireList = () => {
       codigo: "3",
       categoria: "Aulas",
       descricao: "Avaliar a satisfação geral dos clientes",
-      dataCriacao: "2025-01-24",
+      dataCriacao: "2025-10-24",
       status: "Inativo",
     },
     {
@@ -170,7 +170,7 @@ const QuestionnaireList = () => {
       codigo: "4",
       categoria: "Geral",
       descricao: "Avaliar a satisfação geral dos clientes",
-      dataCriacao: "2025-01-24",
+      dataCriacao: "2025-10-24",
       status: "Ativo",
     },
   ];
