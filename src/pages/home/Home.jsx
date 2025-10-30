@@ -32,29 +32,33 @@ const Home = () => {
       description: "Gerencie os clientes do sistema",
       icon: <People sx={{ fontSize: 40 }} />,
       path: "/consultar-clientes",
-      color: theme.palette.primary.main
+      color: theme.palette.primary.main,
+      disabled: false
     },
-    /*{
+    {
       title: "Perguntas",
       description: "Gerencie as perguntas do sistema",
       icon: <Quiz sx={{ fontSize: 40 }} />,
       path: "/gerenciar-perguntas",
-      color: theme.palette.success.main
-    },*/
+      color: theme.palette.success.main,
+      disabled: true // Desabilitado
+    },
     {
       title: "Questionarios",
       description: "Crie e gerencie questionários",
       icon: <Assignment sx={{ fontSize: 40 }} />,
       path: "/consultar-questionario",
-      color: theme.palette.warning.main
+      color: theme.palette.warning.main,
+      disabled: false
     },
-    /*{
+    {
       title: "Dashboard",
       description: "Visualize relatórios e métricas",
       icon: <Dashboard sx={{ fontSize: 40 }} />,
       path: "/example",
-      color: theme.palette.info.main
-    }*/
+      color: theme.palette.info.main,
+      disabled: true // Desabilitado
+    }
   ];
 
   return (
@@ -93,9 +97,41 @@ const Home = () => {
             maxWidth: 350, 
             margin: '0 auto',
             minHeight: 320,
+            opacity: item.disabled ? 0.7 : 1,
+            position: 'relative',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: item.disabled ? 'none' : 'translateY(-4px)',
+              boxShadow: item.disabled ? 1 : 4
+            }
           }}
         >
-          <CardContent sx={{ p: 3, flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          {/* Badge "Disponível em breve" */}
+          {item.disabled && (
+            <Chip 
+              label="Disponível em breve" 
+              size="small" 
+              color="primary"
+              sx={{ 
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                fontSize: '0.65rem',
+                height: 24,
+                backgroundColor: `${theme.palette.primary.main}20`,
+                color: theme.palette.primary.main,
+                border: `1px solid ${theme.palette.primary.main}30`,
+                zIndex: 1
+              }}
+            />
+          )}
+
+          <CardContent sx={{ 
+            p: 3, 
+            flexGrow: 1, 
+            display: "flex", 
+            flexDirection: "column",
+          }}>
             {/* Ícone */}
             <Box
               sx={{
@@ -109,19 +145,33 @@ const Home = () => {
                 color: item.color,
                 mb: 2,
                 mx: 'auto', 
+                opacity: item.disabled ? 0.6 : 1
               }}
             >
               {item.icon}
             </Box>
 
             {/* Título e Descrição */}
-            <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 600, textAlign: 'center' }}>
+            <Typography 
+              variant="h5" 
+              component="h2" 
+              gutterBottom 
+              sx={{ 
+                fontWeight: 600, 
+                textAlign: 'center',
+                opacity: item.disabled ? 0.8 : 1
+              }}
+            >
               {item.title}
             </Typography>
             <Typography 
               variant="body2" 
-              color="text.secondary" 
-              sx={{ mb: 3, flexGrow: 1, textAlign: 'center' }}
+              sx={{ 
+                mb: 3, 
+                flexGrow: 1, 
+                textAlign: 'center',
+                opacity: item.disabled ? 0.7 : 1
+              }}
             >
               {item.description}
             </Typography>
@@ -130,19 +180,21 @@ const Home = () => {
             <Button
               variant="contained"
               fullWidth
+              disabled={item.disabled}
               sx={{
                 backgroundColor: item.color,
+                opacity: item.disabled ? 0.6 : 1,
                 py: 1.5,
                 fontSize: '1rem',
                 fontWeight: 600,
                 "&:hover": {
                   backgroundColor: item.color,
-                  opacity: 0.9
+                  opacity: item.disabled ? 0.6 : 0.9
                 }
               }}
-              onClick={() => navigate(item.path)}
+              onClick={() => !item.disabled && navigate(item.path)}
             >
-              Acessar
+              {item.disabled ? "Em Breve" : "Acessar"}
             </Button>
           </CardContent>
         </Card>
