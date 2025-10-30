@@ -20,25 +20,130 @@ import {
   Chip,
   InputAdornment,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert
 } from "@mui/material";
 import {
   Add,
   Edit,
   Delete,
   Search,
-  PlaylistAddCheck, // Ícone para Total de Questionários
-  BarChart, // Ícone para Questionários Ativos
-  QuestionAnswer, // Ícone para Total de Perguntas
-  ArrowBack, // Ícone para o botão Voltar
+  PlaylistAddCheck,
+  BarChart,
+  QuestionAnswer,
+  Warning as WarningIcon
 } from "@mui/icons-material";
 
 import { usePageTitle } from "../../context/PageTitleContext.jsx";
+
+// Componente Modal de Exclusão
+const ModalDeleteQuestionnaire = ({
+  open,
+  onClose,
+  onConfirm,
+  title = "Confirmar Exclusão",
+  message = "Tem certeza que deseja excluir este questionário?",
+  confirmText = "Excluir",
+  cancelText = "Cancelar",
+  itemName = "",
+  severity = "warning"
+}) => {
+  const handleConfirm = () => {
+    onConfirm();
+    onClose();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      aria-labelledby="confirmation-dialog-title"
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle id="confirmation-dialog-title" sx={{ pb: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <WarningIcon color="warning" />
+          <Typography variant="h6" component="span" sx={{ fontWeight: 'bold' }}>
+            {title}
+          </Typography>
+        </Box>
+      </DialogTitle>
+
+      <DialogContent sx={{ pt: 1 }}>
+        <Alert severity={severity} sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+            {message}
+          </Typography>
+        </Alert>
+
+        {itemName && (
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: 'grey.50',
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: 'grey.300',
+              mt: 2
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                fontStyle: 'italic',
+                color: 'text.secondary',
+                textAlign: 'center'
+              }}
+            >
+              "{itemName}"
+            </Typography>
+          </Box>
+        )}
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 2, textAlign: 'center' }}
+        >
+          Esta ação não pode ser desfeita.
+        </Typography>
+      </DialogContent>
+
+      <DialogActions sx={{ p: 3, gap: 1 }}>
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          size="large"
+          sx={{ flex: 1 }}
+        >
+          {cancelText}
+        </Button>
+        <Button
+          onClick={handleConfirm}
+          variant="contained"
+          color="error"
+          size="large"
+          startIcon={<Delete />}
+          sx={{ flex: 1 }}
+        >
+          {confirmText}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 const QuestionnaireList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [questionnaires, setQuestionnaires] = useState([]);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedQuestionnaire, setSelectedQuestionnaire] = useState(null);
   const { setTitle } = usePageTitle();
 
   // Dados mockados baseados na imagem
@@ -88,23 +193,32 @@ const QuestionnaireList = () => {
   const handleEdit = (q) => {
     try {
       console.log('Navigating to edit:', `/editar-questionario/${q.id}`);
-      // Force navigation to the edit page
       window.location.href = `/editar-questionario/${q.id}`;
     } catch (error) {
       console.error('Navigation error:', error);
     }
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Deseja realmente excluir este questionário?")) {
-      setQuestionnaires((prev) => prev.filter((q) => q.id !== id));
+  const handleDeleteClick = (questionnaire) => {
+    setSelectedQuestionnaire(questionnaire);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (selectedQuestionnaire) {
+      setQuestionnaires((prev) => prev.filter((q) => q.id !== selectedQuestionnaire.id));
+      setSelectedQuestionnaire(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setSelectedQuestionnaire(null);
   };
 
   const handleCreateNew = () => {
     try {
       console.log('Navigating to create new questionnaire');
-      // Force navigation to the create page
       window.location.href = '/cadastrar-questionario';
     } catch (error) {
       console.error('Navigation error:', error);
@@ -149,6 +263,14 @@ const QuestionnaireList = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Modal de Exclusão */}
+      <ModalDeleteQuestionnaire
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        itemName={selectedQuestionnaire ? `Questionário ${selectedQuestionnaire.codigo} - ${selectedQuestionnaire.descricao}` : ""}
+      />
+
       {/* Cabeçalho */}
       <Box sx={{ mb: 3 }}>
         <Typography
@@ -181,11 +303,10 @@ const QuestionnaireList = () => {
                         sx={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "space-between", // Espaçamento entre valor e título
+                        justifyContent: "space-between",
                         mb: 0.5,
                       }}
                     >
-                      {/* Ícone e Valor - Alinhados no lado esquerdo do CardContent */}
                       <Box
                         sx={{
                           display: "flex",
@@ -204,7 +325,6 @@ const QuestionnaireList = () => {
                           {metric.value}
                         </Typography>
                       </Box>
-                      {/* Título */}
                       <Typography variant="body2" color="text.secondary" sx={{ml: 'auto'}}>
                         {metric.title}
                       </Typography>
@@ -235,8 +355,6 @@ const QuestionnaireList = () => {
                 gap: 1, 
               }}
             >
-
-              {/* Botão Novo Questionário */}
               <Button
                 variant="contained"
                 size="small"
@@ -332,7 +450,7 @@ const QuestionnaireList = () => {
                     <IconButton
                       size="small"
                       color="error"
-                      onClick={() => handleDelete(q.id)}
+                      onClick={() => handleDeleteClick(q)}
                     >
                       <Delete fontSize="small" />
                     </IconButton>

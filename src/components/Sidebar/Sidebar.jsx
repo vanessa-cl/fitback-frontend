@@ -63,24 +63,24 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           id="panel2a-header"
           expanded={expanded === "panel2"}
         >
-          <p>Questionáriios</p>
+          <p>Questionários</p>
         </S.AccordionLabel>
         <S.AccordionItem>
           <S.AccordionLink
-            selected={activeLink === "/consultar-questionarios"}
-            to="/consultar-questionarios"
-            onClick={() => setActiveLink("/consultar-questionarios")}
+            selected={activeLink === "/consultar-questionario"}
+            to="/consultar-questionario"
+            onClick={() => setActiveLink("/consultar-questionario")}
           >
             Consultar
           </S.AccordionLink>
         </S.AccordionItem>
         <S.AccordionItem>
           <S.AccordionLink
-            selected={activeLink === "/criar-questionarios"}
-            to="/criar-questionarios"
-            onClick={() => setActiveLink("/criar-questionarios")}
+            selected={activeLink === "/cadastrar-questionario"}
+            to="/cadastrar-questionario"
+            onClick={() => setActiveLink("/cadastrar-questionario")}
           >
-            Criar
+            Cadastrar
           </S.AccordionLink>
         </S.AccordionItem>
       </S.SidebarAccordion>
