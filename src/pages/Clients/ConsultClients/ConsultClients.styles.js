@@ -7,7 +7,7 @@ export const ConsultClientsContainer = styled.div`
   width: 100%;
 `;
 
-export const SearchContainer = styled.div`
+export const SearchContainer = styled.form`
   display: flex;
   align-items: center;
   justify-content: space-between;

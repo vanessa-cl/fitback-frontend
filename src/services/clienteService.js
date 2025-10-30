@@ -27,6 +27,10 @@ class ClienteService extends ApiService {
   deleteCliente(id) {
     return this.delete(`/${id}`);
   }
+
+  searchClientes(termo) {
+    return this.get(`/buscar/${termo}`);
+  }
 }
 
 export default new ClienteService();

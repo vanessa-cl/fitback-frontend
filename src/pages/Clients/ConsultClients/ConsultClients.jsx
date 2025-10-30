@@ -79,6 +79,25 @@ const ConsultClients = () => {
   const { setTitle } = usePageTitle();
   const navigate = useNavigate();
 
+  const handleSearch = () => {
+    if (searchTerm) {
+      clienteService
+        .searchClientes(searchTerm)
+        .then((response) => {
+          setClients(response.data);
+        })
+        .catch((err) => {
+          setSnackbar({
+            open: true,
+            message: err.response.data.message,
+            severity: "error",
+          });
+        });
+    } else {
+      fetchClients();
+    }
+  };
+
   const fetchClients = async () => {
     try {
       const response = await clienteService.getAllClientes();
@@ -254,11 +273,21 @@ const ConsultClients = () => {
         onClose={handleClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert onClose={handleClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+        <Alert
+          onClose={handleClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <S.SearchContainer>
+      <S.SearchContainer
+        component="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSearch();
+        }}
+      >
         <S.SearchInput
           variant="filled"
           value={searchTerm}
@@ -279,6 +308,8 @@ const ConsultClients = () => {
           variant="contained"
           color="primary"
           startIcon={<SearchIcon />}
+          onClick={handleSearch}
+          type="submit"
         >
           Pesquisar
         </Button>
