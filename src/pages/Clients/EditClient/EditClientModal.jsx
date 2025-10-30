@@ -1,6 +1,7 @@
 import { Button, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import * as S from "../RegisterClient/RegisterClient.styles.js";
+import * as T from "./EditClientModal.styles.js"
 import { DialogWrapper } from "./EditClientModal.styles.js";
 import CheckTwoTone from "@mui/icons-material/CheckTwoTone";
 import CancelTwoTone from "@mui/icons-material/CancelTwoTone";
@@ -40,7 +41,7 @@ const EditClientModal = ({
     <DialogWrapper open={openEditModal} onClose={() => setOpenEditModal(false)}>
       <h3>{detailsMode ? "Detalhes do Cliente" : "Editar Cliente"}</h3>
       <S.RegisterClientForm>
-        <S.FormGrid>
+        <T.ClientDetailsForm>
           <TextField
             id="first-name-input"
             name="first-name-input"
@@ -107,7 +108,7 @@ const EditClientModal = ({
             readOnly={detailsMode}
             disabled={detailsMode}
           />
-        </S.FormGrid>
+        </T.ClientDetailsForm>
         <S.ActionRow>
           <Button
             startIcon={<CancelTwoTone />}

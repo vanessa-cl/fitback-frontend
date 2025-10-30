@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import {
   Box,
   Typography,
@@ -24,7 +24,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Alert
+  Alert,
 } from "@mui/material";
 import {
   Add,
@@ -34,7 +34,7 @@ import {
   PlaylistAddCheck,
   BarChart,
   QuestionAnswer,
-  Warning as WarningIcon
+  Warning as WarningIcon,
 } from "@mui/icons-material";
 
 import { usePageTitle } from "../../context/PageTitleContext.jsx";
@@ -49,7 +49,7 @@ const ModalDeleteQuestionnaire = ({
   confirmText = "Excluir",
   cancelText = "Cancelar",
   itemName = "",
-  severity = "warning"
+  severity = "warning",
 }) => {
   const handleConfirm = () => {
     onConfirm();
@@ -65,9 +65,9 @@ const ModalDeleteQuestionnaire = ({
       fullWidth
     >
       <DialogTitle id="confirmation-dialog-title" sx={{ pb: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <WarningIcon color="warning" />
-          <Typography variant="h6" component="span" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
             {title}
           </Typography>
         </Box>
@@ -75,7 +75,7 @@ const ModalDeleteQuestionnaire = ({
 
       <DialogContent sx={{ pt: 1 }}>
         <Alert severity={severity} sx={{ mb: 2 }}>
-          <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+          <Typography variant="body1" sx={{ fontWeight: "medium" }}>
             {message}
           </Typography>
         </Alert>
@@ -84,19 +84,19 @@ const ModalDeleteQuestionnaire = ({
           <Box
             sx={{
               p: 2,
-              bgcolor: 'grey.50',
+              bgcolor: "grey.50",
               borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'grey.300',
-              mt: 2
+              border: "1px solid",
+              borderColor: "grey.300",
+              mt: 2,
             }}
           >
             <Typography
               variant="body2"
               sx={{
-                fontStyle: 'italic',
-                color: 'text.secondary',
-                textAlign: 'center'
+                fontStyle: "italic",
+                color: "text.secondary",
+                textAlign: "center",
               }}
             >
               "{itemName}"
@@ -107,7 +107,7 @@ const ModalDeleteQuestionnaire = ({
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ mt: 2, textAlign: 'center' }}
+          sx={{ mt: 2, textAlign: "center" }}
         >
           Esta ação não pode ser desfeita.
         </Typography>
@@ -145,6 +145,7 @@ const QuestionnaireList = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState(null);
   const { setTitle } = usePageTitle();
+  const navigate = useNavigate();
 
   // Dados mockados baseados na imagem
   const mockQuestionnaires = [
@@ -174,6 +175,11 @@ const QuestionnaireList = () => {
     },
   ];
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    
+  };
+
   useEffect(() => {
     setTitle("Consultar Questionários");
   }, [setTitle]);
@@ -188,14 +194,12 @@ const QuestionnaireList = () => {
     setPage(0);
   };
 
-  const navigate = useNavigate();
-
   const handleEdit = (q) => {
     try {
-      console.log('Navigating to edit:', `/editar-questionario/${q.id}`);
-      window.location.href = `/editar-questionario/${q.id}`;
+      console.log("Navigating to edit:", `/editar-questionario/${q.id}`);
+      navigate(`/editar-questionario/${q.id}`, { state: { questionnaire: q } });
     } catch (error) {
-      console.error('Navigation error:', error);
+      console.error("Navigation error:", error);
     }
   };
 
@@ -206,7 +210,9 @@ const QuestionnaireList = () => {
 
   const handleDeleteConfirm = () => {
     if (selectedQuestionnaire) {
-      setQuestionnaires((prev) => prev.filter((q) => q.id !== selectedQuestionnaire.id));
+      setQuestionnaires((prev) =>
+        prev.filter((q) => q.id !== selectedQuestionnaire.id)
+      );
       setSelectedQuestionnaire(null);
     }
   };
@@ -218,10 +224,10 @@ const QuestionnaireList = () => {
 
   const handleCreateNew = () => {
     try {
-      console.log('Navigating to create new questionnaire');
-      window.location.href = '/cadastrar-questionario';
+      console.log("Navigating to create new questionnaire");
+      navigate("/cadastrar-questionario");
     } catch (error) {
-      console.error('Navigation error:', error);
+      console.error("Navigation error:", error);
     }
   };
 
@@ -241,7 +247,7 @@ const QuestionnaireList = () => {
   const activeQuestionnaires = questionnaires.filter(
     (q) => q.status === "Ativo"
   ).length;
-  const totalQuestions = 4; 
+  const totalQuestions = 4;
 
   const metricCards = [
     {
@@ -268,7 +274,11 @@ const QuestionnaireList = () => {
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
-        itemName={selectedQuestionnaire ? `Questionário ${selectedQuestionnaire.codigo} - ${selectedQuestionnaire.descricao}` : ""}
+        itemName={
+          selectedQuestionnaire
+            ? `Questionário ${selectedQuestionnaire.codigo} - ${selectedQuestionnaire.descricao}`
+            : ""
+        }
       />
 
       {/* Cabeçalho */}
@@ -300,7 +310,7 @@ const QuestionnaireList = () => {
                 >
                   <CardContent>
                     <Box
-                        sx={{
+                      sx={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
@@ -325,7 +335,11 @@ const QuestionnaireList = () => {
                           {metric.value}
                         </Typography>
                       </Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ml: 'auto'}}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ ml: "auto" }}
+                      >
                         {metric.title}
                       </Typography>
                     </Box>
@@ -333,26 +347,32 @@ const QuestionnaireList = () => {
                 </Card>
               </Grid>
             ))}
-          </Grid>
-        </Grid>
-
-        <Grid item xs={12} lg={3}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              height: "100%", 
-              justifyContent: "space-between",
-            }}
-          >
             <Box
+              component="form"
+              onSubmit={handleSearchSubmit}
               sx={{
                 display: "flex",
-                justifyContent: { xs: "space-between", lg: "flex-end" }, 
+                justifyContent: { xs: "space-between", lg: "flex-end" },
+                alignItems: "center",
                 mb: { xs: 2, lg: 1 },
-                gap: 1, 
+                gap: 1,
               }}
             >
+              <TextField
+                placeholder="Título, descrição ou id..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                variant="outlined"
+                size="small"
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
               <Button
                 variant="contained"
                 size="small"
@@ -368,27 +388,10 @@ const QuestionnaireList = () => {
                 Novo Questionário
               </Button>
             </Box>
-
-            {/* Input de Pesquisa */}
-            <TextField
-              placeholder="Título, descrição ou id..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              variant="outlined"
-              size="small"
-              fullWidth 
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search color="action" />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
+          </Grid>
         </Grid>
       </Grid>
-      
+
       {/* Tabela de Questionários */}
       <Paper elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
         <TableContainer>
@@ -398,9 +401,9 @@ const QuestionnaireList = () => {
                 <TableCell>
                   <strong>Código</strong>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <strong>Categoria</strong>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <strong>Descrição</strong>
                 </TableCell>
@@ -419,7 +422,7 @@ const QuestionnaireList = () => {
               {paginated.map((q) => (
                 <TableRow key={q.id} hover>
                   <TableCell>{q.codigo}</TableCell>
-                  <TableCell>{q.categoria}</TableCell>
+                  {/* <TableCell>{q.categoria}</TableCell> */}
                   <TableCell>{q.descricao}</TableCell>
                   <TableCell>
                     {new Date(q.dataCriacao).toLocaleDateString("pt-BR")}

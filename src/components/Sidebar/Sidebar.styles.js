@@ -14,7 +14,7 @@ export const SidebarWrapper = styled(Drawer)`
   position: relative !important;
   display: flex;
   justify-content: space-between;
-  height: calc(100vh - ${HEADER_HEIGHT});
+  height: auto;
   z-index: 0;
   overflow: hidden;
   margin-top: ${HEADER_HEIGHT};

@@ -20,7 +20,12 @@ import {
   TableRow,
   TablePagination,
 } from "@mui/material";
-import { ArrowBack, ArrowForward, RadioButtonUnchecked, CheckCircle } from "@mui/icons-material";
+import {
+  ArrowBack,
+  ArrowForward,
+  RadioButtonUnchecked,
+  CheckCircle,
+} from "@mui/icons-material";
 import questionarioService from "../../../services/questionarioService";
 import { styles } from "./RegisterQuestionnaire.styles";
 
@@ -57,56 +62,72 @@ const RegisterQuestionnaire = () => {
   }, [setTitle, editModelId]);
 
   useEffect(() => {
-      let mounted = true;
+    let mounted = true;
 
-      (async () => {
-        // carregar categorias
+    (async () => {
+      // carregar categorias
+      try {
+        const resCat = await questionarioService.getCategorias();
+        if (mounted) setCategorias(resCat.data || []);
+      } catch {
+        if (mounted) setCategorias([]);
+      }
+
+      // carregar perguntas iniciais (usa aplicarFiltros internamente)
+      await aplicarFiltros();
+
+      // se for edição, carregar modelo e perguntas já salvas
+      if (editModelId) {
         try {
-          const resCat = await questionarioService.getCategorias();
-          if (mounted) setCategorias(resCat.data || []);
+          const resModel = await questionarioService.getModelo(editModelId);
+          if (mounted) {
+            const modelo = resModel.data || {};
+            setTitulo(modelo.nome || "");
+            setDescricao(modelo.descricao || "");
+          }
         } catch {
-          if (mounted) setCategorias([]);
+          // ignore
         }
 
-        // carregar perguntas iniciais (usa aplicarFiltros internamente)
-        await aplicarFiltros();
-
-        // se for edição, carregar modelo e perguntas já salvas
-        if (editModelId) {
-          try {
-            const resModel = await questionarioService.getModelo(editModelId);
-            if (mounted) {
-              const modelo = resModel.data || {};
-              setTitulo(modelo.nome || "");
-              setDescricao(modelo.descricao || "");
-            }
-          } catch {
-            // ignore
+        try {
+          const resModelPerg = await questionarioService.getModeloPerguntas(
+            editModelId
+          );
+          if (mounted) {
+            const perguntas = resModelPerg.data || [];
+            setPerguntasSelecionadas(
+              perguntas.map((p) => ({
+                id: p.id_pergunta,
+                conteudo: p.conteudo,
+                tipo: p.tipo,
+                categoria: p.categoria,
+                ordem: p.ordem,
+              }))
+            );
           }
-
-          try {
-            const resModelPerg = await questionarioService.getModeloPerguntas(editModelId);
-            if (mounted) {
-              const perguntas = resModelPerg.data || [];
-              setPerguntasSelecionadas(
-                perguntas.map((p) => ({ id: p.id_pergunta, conteudo: p.conteudo, tipo: p.tipo, categoria: p.categoria, ordem: p.ordem }))
-              );
-            }
-          } catch {
-            // ignore
-          }
+        } catch {
+          // ignore
         }
-      })();
+      }
+    })();
 
-      return () => {
-        mounted = false;
-      };
-    }, [editModelId]);
+    return () => {
+      mounted = false;
+    };
+  }, [editModelId]);
 
   // carrega perguntas com filtros (se nenhum parâmetro for passado, usa os estados atuais)
-  const aplicarFiltros = async ({ search = filtroNome, categoria = filtroCategoria, tipo = filtroTipo } = {}) => {
+  const aplicarFiltros = async ({
+    search = filtroNome,
+    categoria = filtroCategoria,
+    tipo = filtroTipo,
+  } = {}) => {
     try {
-      const res = await questionarioService.getPerguntas({ search, categoria, tipo });
+      const res = await questionarioService.getPerguntas({
+        search,
+        categoria,
+        tipo,
+      });
       setPerguntasFiltradas(res.data || []);
     } catch {
       setPerguntasFiltradas([]);
@@ -114,11 +135,23 @@ const RegisterQuestionnaire = () => {
   };
 
   const togglePergunta = (pergunta) => {
-    const jaExiste = perguntasSelecionadas.find(p => p.id === pergunta.id_pergunta);
+    const jaExiste = perguntasSelecionadas.find(
+      (p) => p.id === pergunta.id_pergunta
+    );
     if (jaExiste) {
-      setPerguntasSelecionadas(prev => prev.filter(p => p.id !== pergunta.id_pergunta));
+      setPerguntasSelecionadas((prev) =>
+        prev.filter((p) => p.id !== pergunta.id_pergunta)
+      );
     } else {
-      setPerguntasSelecionadas(prev => [...prev, { id: pergunta.id_pergunta, conteudo: pergunta.conteudo, tipo: pergunta.tipo, categoria: pergunta.categoria }]);
+      setPerguntasSelecionadas((prev) => [
+        ...prev,
+        {
+          id: pergunta.id_pergunta,
+          conteudo: pergunta.conteudo,
+          tipo: pergunta.tipo,
+          categoria: pergunta.categoria,
+        },
+      ]);
     }
   };
 
@@ -138,41 +171,60 @@ const RegisterQuestionnaire = () => {
       if (!editModelId) {
         const payload = { nome: titulo, descricao };
         const res = await questionarioService.createModelo(payload);
-        console.log('Resposta createModelo:', res);
+        console.log("Resposta createModelo:", res);
 
-        // extrair id 
+        // extrair id
         id_modelo = res?.data?.id ?? res?.data?.insertId ?? res?.data ?? null;
         // se a API retornar apenas o objeto criado sem id, tentar inspecionar status/data
-        if (!id_modelo && res && typeof res === 'object' && res.data && typeof res.data === 'object') {
-          id_modelo = res.data.id ?? res.data.insertId ?? res.data.insert_id ?? null;
+        if (
+          !id_modelo &&
+          res &&
+          typeof res === "object" &&
+          res.data &&
+          typeof res.data === "object"
+        ) {
+          id_modelo =
+            res.data.id ?? res.data.insertId ?? res.data.insert_id ?? null;
         }
 
         if (!id_modelo) {
-          console.error('Não foi possível obter o id do modelo criado:', res);
-          alert('Erro ao criar o questionário (id não retornado). Verifique o console para mais detalhes.');
+          console.error("Não foi possível obter o id do modelo criado:", res);
+          alert(
+            "Erro ao criar o questionário (id não retornado). Verifique o console para mais detalhes."
+          );
           return;
         }
       } else {
         // atualizar nome/descricao
-        await questionarioService.updateModelo(editModelId, { nome: titulo, descricao });
+        await questionarioService.updateModelo(editModelId, {
+          nome: titulo,
+          descricao,
+        });
       }
 
       // garantir id como string/number e navegar para ordenação
-      id_modelo = typeof id_modelo === 'object' ? JSON.stringify(id_modelo) : String(id_modelo);
-      console.log('Navegando para ordenar-questionario com id:', id_modelo);
-      navigate(`/ordenar-questionario/${id_modelo}`, { state: { perguntas: perguntasSelecionadas } });
+      id_modelo =
+        typeof id_modelo === "object"
+          ? JSON.stringify(id_modelo)
+          : String(id_modelo);
+      console.log("Navegando para ordenar-questionario com id:", id_modelo);
+      navigate(`/ordenar-questionario/${id_modelo}`, {
+        state: { perguntas: perguntasSelecionadas },
+      });
     } catch (err) {
-      console.error('Erro em handleNext:', err);
-      const msg = err?.response?.data?.message || err?.message || 'Erro ao criar/atualizar o modelo';
+      console.error("Erro em handleNext:", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Erro ao criar/atualizar o modelo";
       alert(msg);
     }
   };
 
-  //----------------------------------------------------------------------------------------- 
+  //-----------------------------------------------------------------------------------------
 
   return (
     <Box sx={styles.container}>
-
       <Typography variant="h6" sx={styles.sectionTitle}>
         1 - Preencha os dados do questionário:
       </Typography>
@@ -206,9 +258,9 @@ const RegisterQuestionnaire = () => {
             <TextField
               label="Buscar por conteúdo"
               value={filtroNome}
-              onChange={(e) => { 
-                setFiltroNome(e.target.value); 
-                aplicarFiltros({ search: e.target.value }); 
+              onChange={(e) => {
+                setFiltroNome(e.target.value);
+                aplicarFiltros({ search: e.target.value });
               }}
               fullWidth
             />
@@ -219,11 +271,16 @@ const RegisterQuestionnaire = () => {
               <Select
                 value={filtroCategoria}
                 label="Categoria"
-                onChange={(e) => { setFiltroCategoria(e.target.value); aplicarFiltros({ categoria: e.target.value }); }}
+                onChange={(e) => {
+                  setFiltroCategoria(e.target.value);
+                  aplicarFiltros({ categoria: e.target.value });
+                }}
               >
                 <MenuItem value="Todas">Todas</MenuItem>
-                {categorias.map(cat => (
-                  <MenuItem key={cat.id_categoria} value={cat.nome}>{cat.nome}</MenuItem>
+                {categorias.map((cat) => (
+                  <MenuItem key={cat.id_categoria} value={cat.nome}>
+                    {cat.nome}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -234,7 +291,10 @@ const RegisterQuestionnaire = () => {
               <Select
                 value={filtroTipo}
                 label="Tipo de Pergunta"
-                onChange={(e) => { setFiltroTipo(e.target.value); aplicarFiltros({ tipo: e.target.value }); }}
+                onChange={(e) => {
+                  setFiltroTipo(e.target.value);
+                  aplicarFiltros({ tipo: e.target.value });
+                }}
               >
                 <MenuItem value="Todas">Todas</MenuItem>
                 <MenuItem value="aberta">Aberta</MenuItem>
@@ -268,48 +328,63 @@ const RegisterQuestionnaire = () => {
               </TableCell>
             </TableRow>
           </TableHead>
-            <TableBody>
-              {perguntasFiltradas
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((pergunta) => {
-                  const selecionada = perguntasSelecionadas.some(p => p.id === pergunta.id_pergunta);
-                  return (
-                    <TableRow 
-                      key={pergunta.id_pergunta} 
-                      hover
-                      onClick={() => togglePergunta(pergunta)}
-                      sx={selecionada ? styles.selectedRow : styles.tableRow}
-                    >
-                      <TableCell>
-                        {selecionada ? (
-                          <CheckCircle sx={styles.checkIcon} />
-                        ) : (
-                          <RadioButtonUnchecked sx={styles.uncheckedIcon} />
-                        )}
-                      </TableCell>
-                      <TableCell>{pergunta.id_pergunta}</TableCell>
-                      <TableCell>{pergunta.conteudo}</TableCell>
-                      <TableCell>{pergunta.categoria}</TableCell>
-                      <TableCell>{pergunta.tipo}</TableCell>
-                    </TableRow>
-                  );
-                })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          component="div"
-          count={perguntasFiltradas.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[5, 10, 25]}
-          labelRowsPerPage="Linhas por página:"
-        />
+          <TableBody>
+            {perguntasFiltradas
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((pergunta) => {
+                const selecionada = perguntasSelecionadas.some(
+                  (p) => p.id === pergunta.id_pergunta
+                );
+                return (
+                  <TableRow
+                    key={pergunta.id_pergunta}
+                    hover
+                    onClick={() => togglePergunta(pergunta)}
+                    sx={selecionada ? styles.selectedRow : styles.tableRow}
+                  >
+                    <TableCell>
+                      {selecionada ? (
+                        <CheckCircle sx={styles.checkIcon} />
+                      ) : (
+                        <RadioButtonUnchecked sx={styles.uncheckedIcon} />
+                      )}
+                    </TableCell>
+                    <TableCell>{pergunta.id_pergunta}</TableCell>
+                    <TableCell>{pergunta.conteudo}</TableCell>
+                    <TableCell>{pergunta.categoria}</TableCell>
+                    <TableCell>{pergunta.tipo}</TableCell>
+                  </TableRow>
+                );
+              })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        component="div"
+        count={perguntasFiltradas.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+        labelRowsPerPage="Linhas por página:"
+      />
       <Box sx={styles.buttonContainer}>
-        <Button startIcon={<ArrowBack />} onClick={() => navigate('/consultar-questionario')} sx={styles.backButton}>Voltar</Button>
-        <Button variant="contained" endIcon={<ArrowForward />} onClick={handleNext} sx={styles.nextButton}>Próxima Etapa</Button>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => navigate("/consultar-questionario")}
+          sx={styles.backButton}
+        >
+          Voltar
+        </Button>
+        <Button
+          variant="contained"
+          endIcon={<ArrowForward />}
+          onClick={handleNext}
+          sx={styles.nextButton}
+        >
+          Próxima Etapa
+        </Button>
       </Box>
     </Box>
   );

@@ -7,6 +7,7 @@ import AddIcon from "@mui/icons-material/Add";
 import clienteService from "../../../services/clienteService.js";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import { useNavigate } from "react-router";
 
 const INITIAL_FORM_STATE = {
   nome: "",
@@ -26,6 +27,7 @@ const RegisterClient = () => {
     message: "",
     severity: "",
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     setTitle("Cadastrar Cliente");
@@ -175,6 +177,7 @@ const RegisterClient = () => {
             startIcon={<ArrowBackIcon />}
             variant="outlined"
             color="secondary"
+            onClick={() => navigate("/consultar-clientes")}
           >
             Voltar
           </Button>

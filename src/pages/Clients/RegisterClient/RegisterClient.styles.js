@@ -11,21 +11,20 @@ export const FormGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
 
-  :nth-child(1) {
-    grid-column: span 3;
-  }
-
-  :nth-child(2), :nth-child(5) {
+  :nth-child(1),
+  :nth-child(2) {
     grid-column: span 2;
   }
 
   :nth-child(4) {
-    grid-column: span 2;
+    grid-column: span 3;
   }
 
+  :nth-child(3),
+  :nth-child(5),
   :nth-child(6),
   :nth-child(7) {
-    grid-column: span 2;
+    grid-column: span 1;
   }
 `;
 
