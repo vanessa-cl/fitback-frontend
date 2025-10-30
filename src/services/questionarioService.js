@@ -1,31 +1,35 @@
-import { ApiService } from './apiService';
+import { ApiService } from "./apiService";
 
 class QuestionarioService extends ApiService {
   constructor() {
-    super('http://localhost:3001/api');
+    super("http://localhost:3001/api");
   }
 
-  getPerguntas({ search = '' , categoria = 'Todas', tipo = 'Todas'} = {}) {
+  getAllQuestionarios() {
+    return this.get("/questionarios");
+  }
+
+  getPerguntas({ search = "", categoria = "Todas", tipo = "Todas" } = {}) {
     const params = new URLSearchParams();
-    if (tipo !== 'Todas') {
-      params.append('tipo', tipo);
+    if (tipo !== "Todas") {
+      params.append("tipo", tipo);
     }
-    if (categoria !== 'Todas') {
-      params.append('categoria', categoria);
+    if (categoria !== "Todas") {
+      params.append("categoria", categoria);
     }
     if (search.trim()) {
-      params.append('search', search.trim());
+      params.append("search", search.trim());
     }
-    const query = params.toString() ? `?${params.toString()}` : '';
+    const query = params.toString() ? `?${params.toString()}` : "";
     return this.get(`/perguntas${query}`);
   }
 
   getCategorias() {
-    return this.get('/categorias');
+    return this.get("/categorias");
   }
 
   createModelo(data) {
-    return this.post('/questionarios', data);
+    return this.post("/questionarios", data);
   }
 
   updateModelo(id, data) {

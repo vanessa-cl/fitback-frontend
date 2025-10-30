@@ -38,6 +38,7 @@ import {
 } from "@mui/icons-material";
 
 import { usePageTitle } from "../../../context/PageTitleContext.jsx";
+import questionarioService from "../../../services/questionarioService.js";
 
 // Componente Modal de Exclusão
 const ModalDeleteQuestionnaire = ({
@@ -137,6 +138,34 @@ const ModalDeleteQuestionnaire = ({
   );
 };
 
+// Dados mockados baseados na imagem
+const mockQuestionnaires = [
+  {
+    id: 1,
+    codigo: "1",
+    categoria: "Funcionários",
+    descricao: "Avaliar a satisfação geral dos clientes",
+    dataCriacao: "2025-10-24",
+    status: "Ativo",
+  },
+  {
+    id: 3,
+    codigo: "3",
+    categoria: "Aulas",
+    descricao: "Avaliar a satisfação geral dos clientes",
+    dataCriacao: "2025-10-24",
+    status: "Inativo",
+  },
+  {
+    id: 4,
+    codigo: "4",
+    categoria: "Geral",
+    descricao: "Avaliar a satisfação geral dos clientes",
+    dataCriacao: "2025-10-24",
+    status: "Ativo",
+  },
+];
+
 const QuestionnaireList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -147,37 +176,20 @@ const QuestionnaireList = () => {
   const { setTitle } = usePageTitle();
   const navigate = useNavigate();
 
-  // Dados mockados baseados na imagem
-  const mockQuestionnaires = [
-    {
-      id: 1,
-      codigo: "1",
-      categoria: "Funcionários",
-      descricao: "Avaliar a satisfação geral dos clientes",
-      dataCriacao: "2025-10-24",
-      status: "Ativo",
-    },
-    {
-      id: 3,
-      codigo: "3",
-      categoria: "Aulas",
-      descricao: "Avaliar a satisfação geral dos clientes",
-      dataCriacao: "2025-10-24",
-      status: "Inativo",
-    },
-    {
-      id: 4,
-      codigo: "4",
-      categoria: "Geral",
-      descricao: "Avaliar a satisfação geral dos clientes",
-      dataCriacao: "2025-10-24",
-      status: "Ativo",
-    },
-  ];
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    
+  };
+
+  const consultQuestionnaires = async () => {
+    await questionarioService
+      .getAllQuestionarios()
+      .then((response) => {
+        console.log(response.data);
+        setQuestionnaires(response.data);
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar questionários:", error);
+      });
   };
 
   useEffect(() => {
@@ -185,7 +197,7 @@ const QuestionnaireList = () => {
   }, [setTitle]);
 
   useEffect(() => {
-    setQuestionnaires(mockQuestionnaires);
+    consultQuestionnaires();
   }, []);
 
   const handleChangePage = (_, newPage) => setPage(newPage);
@@ -231,17 +243,17 @@ const QuestionnaireList = () => {
     }
   };
 
-  const filtered = questionnaires.filter(
-    (q) =>
-      q.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      q.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      q.descricao.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filtered = questionnaires.filter(
+  //   (q) =>
+  //     // q.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     // q.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     // q.descricao.toLowerCase().includes(searchTerm.toLowerCase())}
+  // );
 
-  const paginated = filtered.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  // const paginated = filtered.slice(
+  //   page * rowsPerPage,
+  //   page * rowsPerPage + rowsPerPage
+  // );
 
   const totalQuestionnaires = questionnaires.length;
   const activeQuestionnaires = questionnaires.filter(
@@ -269,7 +281,6 @@ const QuestionnaireList = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Modal de Exclusão */}
       <ModalDeleteQuestionnaire
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
@@ -280,8 +291,6 @@ const QuestionnaireList = () => {
             : ""
         }
       />
-
-      {/* Cabeçalho */}
       <Box sx={{ mb: 3 }}>
         <Typography
           variant="h5"
@@ -294,8 +303,6 @@ const QuestionnaireList = () => {
         </Typography>
       </Box>
       <Divider sx={{ mb: 3 }} />
-
-      {/* Seção dos Cards e Controles (Pesquisa e Botões) */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} lg={9}>
           <Grid container spacing={2}>
@@ -391,8 +398,6 @@ const QuestionnaireList = () => {
           </Grid>
         </Grid>
       </Grid>
-
-      {/* Tabela de Questionários */}
       <Paper elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
         <TableContainer>
           <Table>
@@ -401,9 +406,6 @@ const QuestionnaireList = () => {
                 <TableCell>
                   <strong>Código</strong>
                 </TableCell>
-                {/* <TableCell>
-                  <strong>Categoria</strong>
-                </TableCell> */}
                 <TableCell>
                   <strong>Descrição</strong>
                 </TableCell>
@@ -419,13 +421,13 @@ const QuestionnaireList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginated.map((q) => (
-                <TableRow key={q.id} hover>
-                  <TableCell>{q.codigo}</TableCell>
-                  {/* <TableCell>{q.categoria}</TableCell> */}
+              {questionnaires.map((q) => (
+                <TableRow key={q.id_modelo} hover>
+                  <TableCell>{q.id_modelo}</TableCell>
+                  <TableCell>{q.nome}</TableCell>
                   <TableCell>{q.descricao}</TableCell>
                   <TableCell>
-                    {new Date(q.dataCriacao).toLocaleDateString("pt-BR")}
+                    {new Date(q.data_criacao).toLocaleDateString("pt-BR")}
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -464,7 +466,7 @@ const QuestionnaireList = () => {
         <Divider />
         <TablePagination
           component="div"
-          count={filtered.length}
+          count={questionnaires.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
