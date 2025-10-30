@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -31,11 +32,14 @@ import {
   ArrowBack, // Ícone para o botão Voltar
 } from "@mui/icons-material";
 
+import { usePageTitle } from "../../context/PageTitleContext.jsx";
+
 const QuestionnaireList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [questionnaires, setQuestionnaires] = useState([]);
+  const { setTitle } = usePageTitle();
 
   // Dados mockados baseados na imagem
   const mockQuestionnaires = [
@@ -66,6 +70,10 @@ const QuestionnaireList = () => {
   ];
 
   useEffect(() => {
+    setTitle("Consultar Questionários");
+  }, [setTitle]);
+
+  useEffect(() => {
     setQuestionnaires(mockQuestionnaires);
   }, []);
 
@@ -75,15 +83,33 @@ const QuestionnaireList = () => {
     setPage(0);
   };
 
-  const handleEdit = (q) => console.log("Editar:", q);
+  const navigate = useNavigate();
+
+  const handleEdit = (q) => {
+    try {
+      console.log('Navigating to edit:', `/editar-questionario/${q.id}`);
+      // Force navigation to the edit page
+      window.location.href = `/editar-questionario/${q.id}`;
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
+
   const handleDelete = (id) => {
     if (window.confirm("Deseja realmente excluir este questionário?")) {
       setQuestionnaires((prev) => prev.filter((q) => q.id !== id));
     }
   };
 
-  const handleGoBack = () => console.log("Voltar para página anterior");
-  const handleCreateNew = () => console.log("Abrir tela de novo questionário");
+  const handleCreateNew = () => {
+    try {
+      console.log('Navigating to create new questionnaire');
+      // Force navigation to the create page
+      window.location.href = '/cadastrar-questionario';
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
 
   const filtered = questionnaires.filter(
     (q) =>
@@ -152,7 +178,7 @@ const QuestionnaireList = () => {
                 >
                   <CardContent>
                     <Box
-                      sx={{
+                        sx={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between", // Espaçamento entre valor e título
