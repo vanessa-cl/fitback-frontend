@@ -7,6 +7,7 @@ import ConsultClients from "../pages/Clients/ConsultClients/ConsultClients.jsx";
 import ListCategories from "../pages/Categories/ListCategories.jsx";
 import RegisterCategory from "../pages/Categories/RegisterCategory.jsx";
 import Login from "../pages/Auth/Login.jsx";
+import QuestionManagement from '../pages/Questions/QuestionManagement.jsx';
 import QuestionnaireList from "../pages/Questionnaire/ConsultQuestionnaire/QuestionnaireList.jsx";
 import RegisterQuestionnaire from "../pages/Questionnaire/RegisterQuestionnaire/RegisterQuestionnaire.jsx";
 import QuestionnaireOrder from "../pages/Questionnaire/QuestionnaireOrder/QuestionnaireOrder.jsx";
@@ -48,6 +49,7 @@ const Router = () => {
             element={<QuestionnaireOrder />}
           />
         </Route>
+        <Route path="/gerenciar-perguntas" element={<QuestionManagement />} />
       </Routes>
     </BrowserRouter>
   );
