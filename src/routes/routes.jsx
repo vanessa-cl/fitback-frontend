@@ -7,15 +7,11 @@ import ConsultClients from "../pages/Clients/ConsultClients/ConsultClients.jsx";
 import ListCategories from "../pages/Categories/ListCategories.jsx";
 import RegisterCategory from "../pages/Categories/RegisterCategory.jsx";
 import Login from "../pages/Auth/Login.jsx";
-import QuestionManagement from '../pages/Questions/QuestionManagement.jsx';
+import QuestionManagement from "../pages/Questions/QuestionManagement.jsx";
 import QuestionnaireList from "../pages/Questionnaire/ConsultQuestionnaire/QuestionnaireList.jsx";
 import RegisterQuestionnaire from "../pages/Questionnaire/RegisterQuestionnaire/RegisterQuestionnaire.jsx";
 import QuestionnaireOrder from "../pages/Questionnaire/QuestionnaireOrder/QuestionnaireOrder.jsx";
-
-// import Login from '../pages/Auth/Login.jsx';
-// import Register from '../pages/Auth/Register.jsx';
-// import Feedback from '../pages/Feedback/Feedback.jsx';
-// import Reports from '../pages/Reports/Reports.jsx';
+import BranchManagement from "../pages/Branches/BranchManagement.jsx"; 
 
 const Router = () => {
   return (
@@ -28,27 +24,19 @@ const Router = () => {
           <Route path="/home" element={<Home />} />
         </Route>
 
+        {/* ⭐ Todas as rotas com Header e Sidebar */}
         <Route element={<DefaultLayout />}>
           <Route path="/app" element={<Home />} />
           <Route path="/consultar-clientes" element={<ConsultClients />} />
           <Route path="/cadastrar-cliente" element={<RegisterClient />} />
-          <Route
-            path="/consultar-questionario"
-            element={<QuestionnaireList />}
-          />
-          <Route
-            path="/cadastrar-questionario"
-            element={<RegisterQuestionnaire />}
-          />
-          <Route
-            path="/editar-questionario/:id"
-            element={<RegisterQuestionnaire />}
-          />
-          <Route
-            path="/ordenar-questionario/:id"
-            element={<QuestionnaireOrder />}
-          />
+
+          <Route path="/consultar-questionario" element={<QuestionnaireList />} />
+          <Route path="/cadastrar-questionario" element={<RegisterQuestionnaire />} />
+          <Route path="/editar-questionario/:id" element={<RegisterQuestionnaire />} />
+          <Route path="/ordenar-questionario/:id" element={<QuestionnaireOrder />} />
+          <Route path="/gerenciar-filiais" element={<BranchManagement />} />
         </Route>
+
         <Route path="/gerenciar-perguntas" element={<QuestionManagement />} />
       </Routes>
     </BrowserRouter>
