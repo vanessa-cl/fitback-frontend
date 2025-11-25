@@ -41,7 +41,7 @@ const Home = () => {
       icon: <Quiz sx={{ fontSize: 40 }} />,
       path: "/gerenciar-perguntas",
       color: theme.palette.success.main,
-      disabled: true // Desabilitado
+      disabled: false // Desabilitado
     },
     {
       title: "Questionários",

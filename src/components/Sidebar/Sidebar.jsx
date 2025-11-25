@@ -84,6 +84,28 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           </S.AccordionLink>
         </S.AccordionItem>
       </S.SidebarAccordion>
+      <S.SidebarAccordion
+        expanded={expanded === "panel3"}
+        onChange={handleAccordionChange("panel3")}
+      >
+        <S.AccordionLabel
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel3a-content"
+          id="panel3a-header"
+          expanded={expanded === "panel3"}
+        >
+          <p>Perguntas</p>
+        </S.AccordionLabel>
+        <S.AccordionItem>
+          <S.AccordionLink
+            selected={activeLink === "/gerenciar-perguntas"}
+            to="/gerenciar-perguntas"
+            onClick={() => setActiveLink("/gerenciar-perguntas")}
+          >
+            Gerenciar
+          </S.AccordionLink>
+        </S.AccordionItem>
+      </S.SidebarAccordion>
     </S.SidebarWrapper>
   );
 };

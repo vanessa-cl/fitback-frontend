@@ -35,9 +35,8 @@ const Router = () => {
           <Route path="/editar-questionario/:id" element={<RegisterQuestionnaire />} />
           <Route path="/ordenar-questionario/:id" element={<QuestionnaireOrder />} />
           <Route path="/gerenciar-filiais" element={<BranchManagement />} />
+          <Route path="/gerenciar-perguntas" element={<QuestionManagement />} />
         </Route>
-
-        <Route path="/gerenciar-perguntas" element={<QuestionManagement />} />
       </Routes>
     </BrowserRouter>
   );
