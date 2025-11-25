@@ -259,7 +259,6 @@ const QuestionnaireList = () => {
   const activeQuestionnaires = questionnaires.filter(
     (q) => q.status === "Ativo"
   ).length;
-  const totalQuestions = 4;
 
   const metricCards = [
     {
@@ -271,11 +270,6 @@ const QuestionnaireList = () => {
       title: "Questionários Ativos",
       value: activeQuestionnaires,
       icon: BarChart,
-    },
-    {
-      title: "Total de Perguntas",
-      value: totalQuestions,
-      icon: QuestionAnswer,
     },
   ];
 
@@ -405,6 +399,9 @@ const QuestionnaireList = () => {
               <TableRow>
                 <TableCell>
                   <strong>Código</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Título</strong>
                 </TableCell>
                 <TableCell>
                   <strong>Descrição</strong>
