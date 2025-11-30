@@ -28,6 +28,10 @@ class PerguntaService extends ApiService {
   searchPerguntas(termo) {
     return this.get(`/buscar/${termo}`);
   }
+
+  searchPerguntasPorCategoria(idCategoria) {
+    return this.get(`/buscar?idCategoria=${idCategoria}`);
+  }
 }
 
 export default new PerguntaService();

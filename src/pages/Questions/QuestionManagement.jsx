@@ -1,13 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Paper,
   Typography,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Button,
   Chip,
   Grid,
@@ -17,19 +12,12 @@ import {
   Divider,
   Snackbar,
   Alert,
-  FormControlLabel,
-  Switch,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Tabs,
   Tab,
-  Menu,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -37,16 +25,12 @@ import {
   Edit as EditIcon,
   Visibility as ViewIcon,
   FitnessCenter as FitnessCenterIcon,
-  CleanHands as CleanHandsIcon,
-  Groups as GroupsIcon,
-  FormatListBulleted as ListIcon,
-  Subject as SubjectIcon,
-  Save as SaveIcon,
-  Cancel as CancelIcon,
 } from "@mui/icons-material";
 import ModalDeleteQuestion from "../../components/Modal/ModalDeleteQuestion";
 import { usePageTitle } from "../../context/PageTitleContext";
 import categoriaService from "../../services/categoriaService";
+import perguntaService from "../../services/perguntaService";
+import QuestionForm from "./QuestionForm";
 
 const PRIMARY_COLOR = "#B25E09";
 const DARK_PRIMARY = "#914d07";
@@ -78,17 +62,18 @@ const QuestionManagement = () => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState(null);
+  const [openQuestionForm, setOpenQuestionForm] = useState(false);
   const [categories, setCategories] = useState([]);
 
   const fetchCategories = async () => {
     categoriaService
       .getAllCategorias()
-      .then((response) => {
-        console.log("Categorias carregadas:", response.data);
-        setCategories(response.data);
+      .then((res) => {
+        console.log("Categorias carregadas:", res.data);
+        setCategories(res.data);
       })
-      .catch((error) => {
-        console.error("Erro ao carregar categorias:", error);
+      .catch((err) => {
+        console.error("Erro ao carregar categorias:", err);
       });
   };
 
@@ -96,38 +81,41 @@ const QuestionManagement = () => {
     fetchCategories();
   }, []);
 
-  const questionTypes = [
-    {
-      value: "estrutura",
-      label: "Estrutura",
-      icon: <FitnessCenterIcon />,
-      color: "#1976d2",
-    },
-    {
-      value: "limpeza",
-      label: "Limpeza",
-      icon: <CleanHandsIcon />,
-      color: "#2e7d32",
-    },
-    {
-      value: "equipe",
-      label: "Equipe",
-      icon: <GroupsIcon />,
-      color: "#ed6c02",
-    },
-  ];
+  const fetchQuestions = () => {
+    perguntaService
+      .getAllPerguntas()
+      .then((res) => {
+        console.log(res.data);
+        setQuestions(res.data);
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar perguntas:", err);
+      });
+  };
 
   useEffect(() => {
-    const savedQuestions = localStorage.getItem("academy-questions");
-    if (savedQuestions) {
-      setQuestions(JSON.parse(savedQuestions));
-    }
+    fetchQuestions();
   }, []);
 
-  const saveQuestions = (updatedQuestions) => {
-    localStorage.setItem("academy-questions", JSON.stringify(updatedQuestions));
-    setQuestions(updatedQuestions);
+  const fetchQuestionsByCategory = (categoryId) => {
+    perguntaService
+      .searchPerguntasPorCategoria(categoryId)
+      .then((res) => {
+        console.log(res.data);
+        setQuestions(res.data);
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar perguntas por categoria:", err);
+      });
   };
+
+  useEffect(() => {
+    if (currentTab === 0) {
+      fetchQuestions();
+    } else {
+      fetchQuestionsByCategory(currentTab);
+    }
+  }, [currentTab]);
 
   const handleAddQuestion = () => {
     if (!currentQuestion.text.trim()) {
@@ -176,13 +164,11 @@ const QuestionManagement = () => {
     setViewDialogOpen(true);
   };
 
-  // Função para abrir o diálogo de confirmação
   const handleDeleteClick = (question) => {
     setQuestionToDelete(question);
     setDeleteDialogOpen(true);
   };
 
-  // Função para confirmar a exclusão
   const handleDeleteConfirm = () => {
     if (questionToDelete) {
       const updatedQuestions = questions.filter(
@@ -212,23 +198,6 @@ const QuestionManagement = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const getTypeInfo = (type) => {
-    return questionTypes.find((qt) => qt.value === type);
-  };
-
-  const filteredQuestions = () => {
-    switch (currentTab) {
-      case 1: // Estrutura
-        return questions.filter((q) => q.type === "estrutura");
-      case 2: // Limpeza
-        return questions.filter((q) => q.type === "limpeza");
-      case 3: // Equipe
-        return questions.filter((q) => q.type === "equipe");
-      default: // Todas
-        return questions;
-    }
-  };
-
   return (
     <Box
       sx={{
@@ -236,13 +205,30 @@ const QuestionManagement = () => {
         margin: "0 auto",
       }}
     >
-      <Box sx={{ p: 1, mb: 4, textAlign: "left" }}>
+      <Box
+        sx={{
+          p: 1,
+          mb: 4,
+          textAlign: "left",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography
           variant="h6"
           sx={{ color: "text.secondary", fontSize: "1.1rem" }}
         >
           Gerencie e crie perguntas para os questionários
         </Typography>
+        <Button
+          sx={{ width: "260px" }}
+          variant="contained"
+          onClick={() => setOpenQuestionForm(true)}
+        >
+          <AddIcon />
+          Adicionar Pergunta
+        </Button>
       </Box>
       <Box
         container
@@ -250,166 +236,11 @@ const QuestionManagement = () => {
         sx={{ display: "flex", gap: 4, height: "100%" }}
       >
         {/* Formulário de Adição/Edição */}
-        <Box
-          sx={{ flex: "0 0 41.6667%", minHeight: "560px", maxHeight: "580px" }}
-        >
-          <Paper
-            elevation={3}
-            sx={{
-              p: 3,
-              position: "sticky",
-              top: 20,
-            }}
-          >
-            <Typography
-              variant="h5"
-              gutterBottom
-              sx={{ fontWeight: "bold", color: SECONDARY_COLOR }}
-            >
-              {isEditing ? "Editar Pergunta" : "Nova Pergunta"}
-            </Typography>
-            <Box
-              component="form"
-              sx={{
-                mb: 4,
-                mt: 4,
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-              }}
-            >
-              <div>
-                <TextField
-                  fullWidth
-                  label="Digite a pergunta"
-                  value={currentQuestion.text}
-                  onChange={(e) =>
-                    setCurrentQuestion({
-                      ...currentQuestion,
-                      text: e.target.value,
-                    })
-                  }
-                  multiline
-                  rows={3}
-                  placeholder="Ex: Como você avalia o estado dos equipamentos?"
-                  sx={{ mb: 3 }}
-                />
-
-                <FormControl fullWidth sx={{ mb: 3 }}>
-                  <InputLabel>Tipo de Pergunta</InputLabel>
-                  <Select
-                    value={currentQuestion.type}
-                    label="Tipo de Pergunta"
-                    onChange={(e) =>
-                      setCurrentQuestion({
-                        ...currentQuestion,
-                        type: e.target.value,
-                      })
-                    }
-                  >
-                    <MenuItem value="">Selecione a categoria</MenuItem>
-                    {categories.map((category) => (
-                      <MenuItem key={category.id_categoria} value={category.id_categoria}>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          {/* {category.icon} */}
-                          {category.nome}
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={currentQuestion.isDescriptive}
-                      onChange={(e) =>
-                        setCurrentQuestion({
-                          ...currentQuestion,
-                          isDescriptive: e.target.checked,
-                        })
-                      }
-                      sx={{
-                        "& .MuiSwitch-switchBase.Mui-checked": {
-                          color: PRIMARY_COLOR,
-                        },
-                        "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                          { backgroundColor: PRIMARY_COLOR },
-                      }}
-                    />
-                  }
-                  label={
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      {currentQuestion.isDescriptive ? (
-                        <SubjectIcon sx={{ color: PRIMARY_COLOR }} />
-                      ) : (
-                        <ListIcon sx={{ color: SECONDARY_COLOR }} />
-                      )}
-                      <Typography>
-                        {currentQuestion.isDescriptive
-                          ? "Pergunta Descritiva"
-                          : "Pergunta Objetiva"}
-                      </Typography>
-                    </Box>
-                  }
-                  sx={{ mb: 4 }}
-                />
-              </div>
-
-              <Box sx={{ display: "flex", gap: 2 }}>
-                {isEditing ? (
-                  <>
-                    <Button
-                      variant="contained"
-                      startIcon={<SaveIcon />}
-                      onClick={handleUpdateQuestion}
-                      sx={{
-                        flex: 1,
-                        py: 1.5,
-                        bgcolor: PRIMARY_COLOR,
-                        "&:hover": { bgcolor: DARK_PRIMARY },
-                      }}
-                    >
-                      Atualizar
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<CancelIcon />}
-                      onClick={resetForm}
-                      sx={{
-                        flex: 1,
-                        py: 1.5,
-                        borderColor: SECONDARY_COLOR,
-                        color: SECONDARY_COLOR,
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    variant="contained"
-                    size="large"
-                    startIcon={<AddIcon />}
-                    onClick={handleAddQuestion}
-                    fullWidth
-                    sx={{
-                      py: 1.5,
-                      bgcolor: PRIMARY_COLOR,
-                      "&:hover": { bgcolor: DARK_PRIMARY },
-                      fontSize: "1.1rem",
-                    }}
-                  >
-                    Adicionar Pergunta
-                  </Button>
-                )}
-              </Box>
-            </Box>
-          </Paper>
-        </Box>
+        <QuestionForm
+          open={openQuestionForm}
+          onClose={() => setOpenQuestionForm(false)}
+          categories={categories}
+        />
         {/*  Consulta de Perguntas */}
         <Box sx={{ flex: "0 0 55.3333%", minHeight: "600px" }}>
           <Paper elevation={3} sx={{ p: 3, width: "100%" }}>
@@ -425,10 +256,20 @@ const QuestionManagement = () => {
                 value={currentTab}
                 onChange={(e, newValue) => setCurrentTab(newValue)}
               >
-                <Tab label="Todas" />
-                <Tab label="Estrutura" />
-                <Tab label="Limpeza" />
-                <Tab label="Equipe" />
+                {console.log(currentTab)}
+                <Tab
+                  label="Todas"
+                  value={0}
+                  sx={{ textTransform: "none", fontWeight: "bold" }}
+                />
+                {categories.map((category, index) => (
+                  <Tab
+                    key={category.id_categoria}
+                    label={category.nome}
+                    value={category.id_categoria}
+                    sx={{ textTransform: "none", fontWeight: "bold" }}
+                  />
+                ))}
               </Tabs>
             </Box>
 
@@ -445,16 +286,10 @@ const QuestionManagement = () => {
                 variant="h5"
                 sx={{ fontWeight: "bold", color: SECONDARY_COLOR }}
               >
-                {currentTab === 0
-                  ? "Todas as Perguntas"
-                  : currentTab === 1
-                  ? "Perguntas de Estrutura"
-                  : currentTab === 2
-                  ? "Perguntas de Limpeza"
-                  : "Perguntas de Equipe"}
+                Perguntas Cadastradas
               </Typography>
               <Chip
-                label={`${filteredQuestions().length} pergunta(s)`}
+                label={`${questions.length} pergunta(s)`}
                 sx={{
                   bgcolor: PRIMARY_COLOR,
                   color: "white",
@@ -465,30 +300,23 @@ const QuestionManagement = () => {
 
             <Divider sx={{ mb: 3 }} />
 
-            {filteredQuestions().length === 0 ? (
+            {questions.length === 0 ? (
               <Box sx={{ textAlign: "center", py: 8 }}>
                 <FitnessCenterIcon
                   sx={{ fontSize: 64, color: "#ccc", mb: 2 }}
                 />
                 <Typography variant="h6" color="textSecondary">
-                  Nenhuma pergunta encontrada
+                  Sem resultados
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
                   {currentTab === 0
                     ? "Comece adicionando sua primeira pergunta!"
-                    : `Nenhuma pergunta do tipo ${
-                        currentTab === 1
-                          ? "Estrutura"
-                          : currentTab === 2
-                          ? "Limpeza"
-                          : "Equipe"
-                      } encontrada.`}
+                    : `Nenhuma pergunta da categoria selecionada encontrada.`}
                 </Typography>
               </Box>
             ) : (
               <Box sx={{ maxHeight: 600, overflow: "auto" }}>
-                {filteredQuestions().map((question) => {
-                  const typeInfo = getTypeInfo(question.type);
+                {questions.map((question) => {
                   return (
                     <Card
                       key={question.id}
@@ -511,7 +339,7 @@ const QuestionManagement = () => {
                               color: SECONDARY_COLOR,
                             }}
                           >
-                            {question.text}
+                            {question.conteudo}
                           </Typography>
                           <Box sx={{ display: "flex", gap: 0.5 }}>
                             <IconButton
@@ -546,38 +374,6 @@ const QuestionManagement = () => {
                             mt: 1,
                           }}
                         >
-                          <Chip
-                            icon={typeInfo.icon}
-                            label={typeInfo.label}
-                            size="small"
-                            variant="outlined"
-                            sx={{
-                              borderColor: typeInfo.color,
-                              color: typeInfo.color,
-                            }}
-                          />
-                          <Chip
-                            icon={
-                              question.isDescriptive ? (
-                                <SubjectIcon />
-                              ) : (
-                                <ListIcon />
-                              )
-                            }
-                            label={
-                              question.isDescriptive ? "Descritiva" : "Objetiva"
-                            }
-                            size="small"
-                            variant="outlined"
-                            sx={{
-                              borderColor: question.isDescriptive
-                                ? PRIMARY_COLOR
-                                : SECONDARY_COLOR,
-                              color: question.isDescriptive
-                                ? PRIMARY_COLOR
-                                : SECONDARY_COLOR,
-                            }}
-                          />
                           {question.createdAt && (
                             <Chip
                               label={new Date(
