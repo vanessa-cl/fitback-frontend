@@ -9,13 +9,17 @@ import {
   Typography,
   Chip,
 } from "@mui/material";
-import { LIGHT_BG } from "../../utils/colors";
+import { LIGHT_BG, SECONDARY_COLOR } from "../../utils/colors";
 
 const QuestionDetailsDialog = ({ open, onClose, question }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+        <Typography
+          variant="h5"
+          gutterBottom
+          sx={{ fontWeight: "bold", color: SECONDARY_COLOR }}
+        >
           Detalhes da Pergunta
         </Typography>
       </DialogTitle>
@@ -95,7 +99,13 @@ const QuestionDetailsDialog = ({ open, onClose, question }) => {
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Fechar</Button>
+        <Button
+          sx={{ width: "220px", mr: 2, mb: 2 }}
+          variant="outlined"
+          onClick={onClose}
+        >
+          Fechar
+        </Button>
       </DialogActions>
     </Dialog>
   );

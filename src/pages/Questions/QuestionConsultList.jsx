@@ -25,7 +25,6 @@ const QuestionConsultList = ({
   setCurrentTab,
   categories,
   onEdit,
-  onView,
   onDelete,
 }) => {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
@@ -34,13 +33,13 @@ const QuestionConsultList = ({
 
    const handleViewQuestion = (question) => {
     setSelectedQuestion(question);
-    setViewDialogOpen(true);
+    setOpenDetailsDialog(true);
   };
 
-  // const handleDeleteQuestion = (question) => {
-  //   setQuestionToDelete(question);
-  //   setDeleteDialogOpen(true);
-  // };
+  const handleDeleteQuestion = (question) => {
+    setQuestionToDelete(question);
+    setOpenDeleteDialog(true);
+  };
 
   // const handleDeleteConfirm = () => {
   //   if (questionToDelete) {
@@ -153,7 +152,7 @@ const QuestionConsultList = ({
                       <Box sx={{ display: "flex", gap: 0.5 }}>
                         <IconButton
                           size="small"
-                          onClick={() => onView(question)}
+                          onClick={() => handleViewQuestion(question)}
                           sx={{ color: PRIMARY_COLOR }}
                         >
                           <ViewIcon />
@@ -167,7 +166,7 @@ const QuestionConsultList = ({
                         </IconButton>
                         <IconButton
                           size="small"
-                          onClick={() => onDelete(question)}
+                          onClick={() => handleDeleteQuestion(question)}
                           sx={{ color: "#d32f2f" }}
                         >
                           <DeleteIcon />
