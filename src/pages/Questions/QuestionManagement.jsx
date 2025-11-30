@@ -28,12 +28,12 @@ const QuestionManagement = () => {
     message: "",
     severity: "success",
   });
-  const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [currentTab, setCurrentTab] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [openQuestionForm, setOpenQuestionForm] = useState(false);
   const [categories, setCategories] = useState([]);
   const { setTitle } = usePageTitle();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setTitle("Gerenciador de Perguntas");
@@ -55,16 +55,17 @@ const QuestionManagement = () => {
     fetchCategories();
   }, []);
 
-  const fetchQuestions = () => {
-    perguntaService
+  const fetchQuestions = async () => {
+    setLoading(true);
+    await perguntaService
       .getAllPerguntas()
       .then((res) => {
-        console.log(res.data);
         setQuestions(res.data);
       })
       .catch((err) => {
         console.error("Erro ao carregar perguntas:", err);
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -91,8 +92,9 @@ const QuestionManagement = () => {
     }
   }, [currentTab]);
 
-  const handleAddQuestion = () => {
-    perguntaService
+  const handleAddQuestion = async () => {
+    setLoading(true);
+    await perguntaService
       .createPergunta({
         id_categoria: currentQuestion.id_categoria,
         tipo: currentQuestion.tipo,
@@ -110,11 +112,13 @@ const QuestionManagement = () => {
       .catch((err) => {
         console.error("Erro ao adicionar pergunta:", err);
         showSnackbar("Erro ao adicionar pergunta", "error");
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
-  const handleUpdateQuestion = () => {
-    perguntaService
+  const handleUpdateQuestion = async () => {
+    setLoading(true);
+    await perguntaService
       .updatePergunta(currentQuestion.id_pergunta, {
         id_categoria: currentQuestion.id_categoria,
         tipo: currentQuestion.tipo,
@@ -132,7 +136,23 @@ const QuestionManagement = () => {
       .catch((err) => {
         console.error("Erro ao atualizar pergunta:", err);
         showSnackbar("Erro ao atualizar pergunta", "error");
-      });
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const handleDeleteConfirm = async (id_pergunta) => {
+    setLoading(true);
+    await perguntaService
+      .deletePergunta(id_pergunta)
+      .then(() => {
+        fetchQuestions();
+        showSnackbar("Pergunta excluída com sucesso!", "success");
+      })
+      .catch((err) => {
+        console.error("Erro ao excluir pergunta:", err);
+        showSnackbar("Erro ao excluir pergunta", "error");
+      })
+      .finally(() => setLoading(false));
   };
 
   const handleEditQuestion = (question) => {
@@ -161,6 +181,7 @@ const QuestionManagement = () => {
         margin: "0 auto",
       }}
     >
+      {loading && <LoadingSpinner />}
       <Box
         sx={{
           p: 1,
@@ -212,8 +233,7 @@ const QuestionManagement = () => {
             setCurrentTab={setCurrentTab}
             categories={categories}
             onEdit={handleEditQuestion}
-            // onView={handleViewQuestion}
-            // onDelete={handleDeleteQuestion}
+            onDelete={handleDeleteConfirm}
           />
         ) : (
           <LoadingSpinner />

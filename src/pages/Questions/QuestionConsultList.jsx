@@ -17,6 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../utils/colors";
 import { useState } from "react";
 import QuestionDetailsDialog from "./QuestionDetailsDialog";
+import QuestionDeleteDialog from "./QuestionDeleteDialog";
 
 const QuestionConsultList = ({
   questions,
@@ -31,26 +32,15 @@ const QuestionConsultList = ({
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
-   const handleViewQuestion = (question) => {
+  const handleViewQuestion = (question) => {
     setSelectedQuestion(question);
     setOpenDetailsDialog(true);
   };
 
   const handleDeleteQuestion = (question) => {
-    setQuestionToDelete(question);
+    setSelectedQuestion(question);
     setOpenDeleteDialog(true);
   };
-
-  // const handleDeleteConfirm = () => {
-  //   if (questionToDelete) {
-  //     const updatedQuestions = questions.filter(
-  //       (q) => q.id !== questionToDelete.id
-  //     );
-  //     saveQuestions(updatedQuestions);
-  //     showSnackbar("Pergunta removida com sucesso!", "info");
-  //     setQuestionToDelete(null);
-  //   }
-  // };
 
   return (
     <Box sx={{ minHeight: "600px", width: "100%" }}>
@@ -210,18 +200,20 @@ const QuestionConsultList = ({
         onClose={() => setOpenDetailsDialog(false)}
         question={selectedQuestion}
       />
-      {/* Componente de Confirmação para Excluir */}
-      {/* <ModalDeleteQuestion
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={handleDeleteConfirm}
+      {/* Modal de Confirmação para Excluir */}
+      <QuestionDeleteDialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        onConfirm={() => {
+          onDelete(selectedQuestion.id_pergunta);
+        }}
         title="Excluir Pergunta"
         message="Tem certeza que deseja excluir esta pergunta?"
         confirmText="Excluir Pergunta"
         cancelText="Manter Pergunta"
-        itemName={questionToDelete?.text}
+        itemName={selectedQuestion?.conteudo}
         severity="error"
-      /> */}
+      />
     </Box>
   );
 };

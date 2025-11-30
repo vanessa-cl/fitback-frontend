@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,14 +8,14 @@ import {
   Button,
   Box,
   Typography,
-  Alert
-} from '@mui/material';
+  Alert,
+} from "@mui/material";
 import {
   Warning as WarningIcon,
-  Delete as DeleteIcon
-} from '@mui/icons-material';
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 
-const ModalDeleteQuestion = ({
+const QuestionDeleteDialog = ({
   open,
   onClose,
   onConfirm,
@@ -24,7 +24,7 @@ const ModalDeleteQuestion = ({
   confirmText = "Excluir",
   cancelText = "Cancelar",
   itemName = "",
-  severity = "warning"
+  severity = "warning",
 }) => {
   const handleConfirm = () => {
     onConfirm();
@@ -40,9 +40,9 @@ const ModalDeleteQuestion = ({
       fullWidth
     >
       <DialogTitle id="confirmation-dialog-title" sx={{ pb: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <WarningIcon color="warning" />
-          <Typography variant="h6" component="span" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
             {title}
           </Typography>
         </Box>
@@ -50,7 +50,7 @@ const ModalDeleteQuestion = ({
 
       <DialogContent sx={{ pt: 1 }}>
         <Alert severity={severity} sx={{ mb: 2 }}>
-          <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+          <Typography variant="body1" sx={{ fontWeight: "medium" }}>
             {message}
           </Typography>
         </Alert>
@@ -59,19 +59,19 @@ const ModalDeleteQuestion = ({
           <Box
             sx={{
               p: 2,
-              bgcolor: 'grey.50',
+              bgcolor: "grey.50",
               borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'grey.300',
-              mt: 2
+              border: "1px solid",
+              borderColor: "grey.300",
+              mt: 2,
             }}
           >
             <Typography
               variant="body2"
               sx={{
-                fontStyle: 'italic',
-                color: 'text.secondary',
-                textAlign: 'center'
+                fontStyle: "italic",
+                color: "text.secondary",
+                textAlign: "center",
               }}
             >
               "{itemName}"
@@ -82,7 +82,7 @@ const ModalDeleteQuestion = ({
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ mt: 2, textAlign: 'center' }}
+          sx={{ mt: 2, textAlign: "center" }}
         >
           Esta ação não pode ser desfeita.
         </Typography>
@@ -112,4 +112,4 @@ const ModalDeleteQuestion = ({
   );
 };
 
-export default ModalDeleteQuestion;
+export default QuestionDeleteDialog;
