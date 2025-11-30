@@ -30,7 +30,7 @@ import ModalDeleteQuestion from "../../components/Modal/ModalDeleteQuestion";
 import { usePageTitle } from "../../context/PageTitleContext";
 import categoriaService from "../../services/categoriaService";
 import perguntaService from "../../services/perguntaService";
-import QuestionForm from "./QuestionForm";
+import QuestionForm from "./QuestionFormDialog";
 
 const PRIMARY_COLOR = "#B25E09";
 const DARK_PRIMARY = "#914d07";
@@ -40,10 +40,12 @@ const SECONDARY_COLOR = "#424242";
 const QuestionManagement = () => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState({
-    id: null,
-    text: "",
-    type: "estrutura",
-    isDescriptive: false,
+    id_categoria: "",
+    tipo: "",
+    ordem_exibicao: "",
+    conteudo: "",
+    permite_multiplas: false,
+    obrigatoria: false,
   });
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -157,6 +159,7 @@ const QuestionManagement = () => {
   const handleEditQuestion = (question) => {
     setCurrentQuestion({ ...question });
     setIsEditing(true);
+    setOpenQuestionForm(true);
   };
 
   const handleViewQuestion = (question) => {
@@ -240,6 +243,9 @@ const QuestionManagement = () => {
           open={openQuestionForm}
           onClose={() => setOpenQuestionForm(false)}
           categories={categories}
+          isEditing={isEditing}
+          currentQuestion={currentQuestion}
+          setCurrentQuestion={setCurrentQuestion}
         />
         {/*  Consulta de Perguntas */}
         <Box sx={{ flex: "0 0 55.3333%", minHeight: "600px" }}>
@@ -256,7 +262,6 @@ const QuestionManagement = () => {
                 value={currentTab}
                 onChange={(e, newValue) => setCurrentTab(newValue)}
               >
-                {console.log(currentTab)}
                 <Tab
                   label="Todas"
                   value={0}

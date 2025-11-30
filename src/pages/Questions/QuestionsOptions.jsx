@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   IconButton,
@@ -12,11 +12,28 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const QuestionsOptions = ({ permiteMultiplas, onChange }) => {
+const QuestionsOptions = ({
+  allowMultiples,
+  onChange,
+  isEditing,
+  initialOptions,
+}) => {
   const [options, setOptions] = useState([
     { id: 1, texto: "" },
     { id: 2, texto: "" },
   ]);
+
+  useEffect(() => {
+    if (isEditing && initialOptions.length > 0) {
+      setOptions(initialOptions);
+      onChange(initialOptions);
+    } else {
+      setOptions([
+        { id: 1, texto: "" },
+        { id: 2, texto: "" },
+      ]);
+    }
+  }, [isEditing, initialOptions]);
 
   const handleChange = (id, value) => {
     const newOptions = options.map((o) =>
@@ -55,7 +72,7 @@ const QuestionsOptions = ({ permiteMultiplas, onChange }) => {
             mb: 1,
           }}
         >
-          {permiteMultiplas ? <Checkbox disabled /> : <Radio disabled />}
+          {allowMultiples ? <Checkbox disabled /> : <Radio disabled />}
 
           <TextField
             fullWidth

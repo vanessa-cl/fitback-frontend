@@ -5,7 +5,6 @@ import {
   FormControlLabel,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   TextField,
   Typography,
@@ -32,16 +31,16 @@ const questionTypes = [
   { value: "escala", label: "Escala (1 a 5)" },
 ];
 
-const QuestionForm = ({ open, onClose, categories }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState({
-    id_categoria: "",
-    tipo: "",
-    ordem_exibicao: "",
-    conteudo: "",
-    permite_multiplas: false,
-    obrigatoria: false,
-  });
+const QuestionForm = ({
+  open,
+  onClose,
+  categories,
+  isEditing,
+  currentQuestion,
+  setCurrentQuestion,
+}) => {
+
+  
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -191,6 +190,8 @@ const QuestionForm = ({ open, onClose, categories }) => {
                 onChange={(newOptions) =>
                   setCurrentQuestion({ ...currentQuestion, opcoes: newOptions })
                 }
+                isEditing={isEditing}
+                initialOptions={currentQuestion.opcoes || []}
               />
             ) : null}
           </Box>
@@ -198,6 +199,19 @@ const QuestionForm = ({ open, onClose, categories }) => {
           <Box sx={{ display: "flex", gap: 2 }}>
             {isEditing ? (
               <>
+                <Button
+                  variant="outlined"
+                  startIcon={<CancelIcon />}
+                  // onClick={resetForm}
+                  sx={{
+                    flex: 1,
+                    py: 1.5,
+                    borderColor: SECONDARY_COLOR,
+                    color: SECONDARY_COLOR,
+                  }}
+                >
+                  Cancelar
+                </Button>
                 <Button
                   variant="contained"
                   startIcon={<SaveIcon />}
@@ -211,19 +225,6 @@ const QuestionForm = ({ open, onClose, categories }) => {
                 >
                   Atualizar
                 </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<CancelIcon />}
-                  // onClick={resetForm}
-                  sx={{
-                    flex: 1,
-                    py: 1.5,
-                    borderColor: SECONDARY_COLOR,
-                    color: SECONDARY_COLOR,
-                  }}
-                >
-                  Cancelar
-                </Button>
               </>
             ) : (
               <>
@@ -236,6 +237,7 @@ const QuestionForm = ({ open, onClose, categories }) => {
                     py: 1.5,
                     borderColor: SECONDARY_COLOR,
                     color: SECONDARY_COLOR,
+                    width: "50%",
                   }}
                 >
                   Cancelar
@@ -245,15 +247,15 @@ const QuestionForm = ({ open, onClose, categories }) => {
                   size="large"
                   startIcon={<AddIcon />}
                   // onClick={handleAddQuestion}
-                  fullWidth
                   sx={{
                     py: 1.5,
                     bgcolor: PRIMARY_COLOR,
                     "&:hover": { bgcolor: DARK_PRIMARY },
                     fontSize: "1.1rem",
+                    width: "50%",
                   }}
                 >
-                  Adicionar Pergunta
+                  Criar Pergunta
                 </Button>
               </>
             )}
