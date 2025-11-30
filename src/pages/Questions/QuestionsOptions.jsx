@@ -26,11 +26,6 @@ const QuestionsOptions = ({
     if (isEditing && initialOptions.length > 0) {
       setOptions(initialOptions);
       onChange(initialOptions);
-    } else {
-      setOptions([
-        { id: 1, texto: "" },
-        { id: 2, texto: "" },
-      ]);
     }
   }, [isEditing, initialOptions]);
 
@@ -43,7 +38,7 @@ const QuestionsOptions = ({
   };
 
   const addOption = () => {
-    const newOption = { id: Date.now(), texto: "" };
+    const newOption = { id: options.length + 1, texto: "" };
     const newOptions = [...options, newOption];
     setOptions(newOptions);
     onChange(newOptions);
@@ -57,6 +52,7 @@ const QuestionsOptions = ({
 
   return (
     <Box mt={2}>
+      {console.log(options)}
       <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
         Opções da Pergunta
       </Typography>

@@ -11,7 +11,7 @@ import {
   Button,
   Dialog,
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import SubjectIcon from "@mui/icons-material/Subject";
 import ListIcon from "@mui/icons-material/List";
 import AddIcon from "@mui/icons-material/Add";
@@ -19,11 +19,11 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CloseIcon from "@mui/icons-material/Close";
 import QuestionsOptions from "./QuestionsOptions";
-
-const PRIMARY_COLOR = "#B25E09";
-const DARK_PRIMARY = "#914d07";
-const LIGHT_BG = "#f5f5f5";
-const SECONDARY_COLOR = "#424242";
+import {
+  PRIMARY_COLOR,
+  SECONDARY_COLOR,
+  DARK_PRIMARY,
+} from "../../utils/colors";
 
 const questionTypes = [
   { value: "aberta", label: "Aberta" },
@@ -31,16 +31,30 @@ const questionTypes = [
   { value: "escala", label: "Escala (1 a 5)" },
 ];
 
-const QuestionForm = ({
+const QuestionFormDialog = ({
   open,
   onClose,
   categories,
   isEditing,
   currentQuestion,
   setCurrentQuestion,
+  resetForm,
+  onAdd,
+  onUpdate,
 }) => {
+  const checkValidFields = () => {
+    const { tipo, opcoes, conteudo, id_categoria, obrigatoria } =
+      currentQuestion;
 
-  
+    if (!conteudo || !id_categoria || !tipo) return false;
+
+    if (tipo === "multipla_escolha") {
+      if (!opcoes || opcoes.length < 2) return false;
+      return opcoes.every((o) => o.texto.trim() !== "");
+    }
+
+    return true;
+  };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -61,7 +75,10 @@ const QuestionForm = ({
             {isEditing ? "Editar Pergunta" : "Nova Pergunta"}
           </Typography>
           <CloseIcon
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              resetForm();
+            }}
             sx={{
               position: "absolute",
               top: 8,
@@ -95,56 +112,55 @@ const QuestionForm = ({
               multiline
               rows={3}
               placeholder="Ex: Como você avalia o estado dos equipamentos?"
+              required
             />
             <Box sx={{ display: "flex", gap: 2 }}>
               <FormControl fullWidth>
-                <InputLabel>Categoria</InputLabel>
+                <InputLabel htmlFor="category-select">Categoria</InputLabel>
                 <Select
+                  id="category-select"
                   value={currentQuestion.id_categoria}
-                  label="Categoria"
                   onChange={(e) =>
                     setCurrentQuestion({
                       ...currentQuestion,
                       id_categoria: e.target.value,
                     })
                   }
+                  required
                 >
-                  <MenuItem value="">Selecione a categoria</MenuItem>
+                  <MenuItem value="" disabled>
+                    Selecione a categoria
+                  </MenuItem>
                   {categories.map((category) => (
                     <MenuItem
                       key={category.id_categoria}
                       value={category.id_categoria}
                     >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        {category.nome}
-                      </Box>
+                      {category.nome}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
 
               <FormControl fullWidth>
-                <InputLabel>Tipo</InputLabel>
+                <InputLabel htmlFor="type-select">Tipo</InputLabel>
                 <Select
+                  id="type-select"
                   value={currentQuestion.tipo}
-                  label="Tipo"
                   onChange={(e) =>
                     setCurrentQuestion({
                       ...currentQuestion,
                       tipo: e.target.value,
                     })
                   }
+                  required
                 >
-                  <MenuItem value="">Selecione o tipo</MenuItem>
+                  <MenuItem value="" disabled>
+                    Selecione o tipo
+                  </MenuItem>
                   {questionTypes.map((type) => (
                     <MenuItem key={type.value} value={type.value}>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        {type.label}
-                      </Box>
+                      {type.label}
                     </MenuItem>
                   ))}
                 </Select>
@@ -164,6 +180,7 @@ const QuestionForm = ({
                   />
                 }
                 label="Obrigatória"
+                required
               />
               {currentQuestion.tipo === "multipla_escolha" ? (
                 <FormControlLabel
@@ -179,6 +196,7 @@ const QuestionForm = ({
                     />
                   }
                   label="Permite Múltiplas Respostas"
+                  required
                 />
               ) : (
                 <></>
@@ -202,7 +220,10 @@ const QuestionForm = ({
                 <Button
                   variant="outlined"
                   startIcon={<CancelIcon />}
-                  // onClick={resetForm}
+                  onClick={() => {
+                    onClose();
+                    resetForm();
+                  }}
                   sx={{
                     flex: 1,
                     py: 1.5,
@@ -231,7 +252,10 @@ const QuestionForm = ({
                 <Button
                   variant="outlined"
                   startIcon={<CancelIcon />}
-                  // onClick={resetForm}
+                  onClick={() => {
+                    onClose();
+                    resetForm();
+                  }}
                   sx={{
                     flex: 1,
                     py: 1.5,
@@ -246,7 +270,11 @@ const QuestionForm = ({
                   variant="contained"
                   size="large"
                   startIcon={<AddIcon />}
-                  // onClick={handleAddQuestion}
+                  onClick={() => {
+                    onAdd();
+                    onClose();
+                  }}
+                  disabled={!checkValidFields()}
                   sx={{
                     py: 1.5,
                     bgcolor: PRIMARY_COLOR,
@@ -266,4 +294,4 @@ const QuestionForm = ({
   );
 };
 
-export default QuestionForm;
+export default React.memo(QuestionFormDialog);

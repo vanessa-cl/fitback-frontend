@@ -1,71 +1,43 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Chip,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Divider,
-  Snackbar,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Tabs,
-  Tab,
-} from "@mui/material";
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Visibility as ViewIcon,
-  FitnessCenter as FitnessCenterIcon,
-} from "@mui/icons-material";
-import ModalDeleteQuestion from "../../components/Modal/ModalDeleteQuestion";
+import { Box, Typography, Button, Snackbar, Alert } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { usePageTitle } from "../../context/PageTitleContext";
 import categoriaService from "../../services/categoriaService";
 import perguntaService from "../../services/perguntaService";
-import QuestionForm from "./QuestionFormDialog";
+import QuestionFormDialog from "./QuestionFormDialog";
+import QuestionConsultList from "./QuestionConsultList";
+import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 
-const PRIMARY_COLOR = "#B25E09";
-const DARK_PRIMARY = "#914d07";
-const LIGHT_BG = "#f5f5f5";
-const SECONDARY_COLOR = "#424242";
+const INITIAL_QUESTION_STATE = {
+  id_categoria: "",
+  tipo: "",
+  ordem_exibicao: "1",
+  conteudo: "",
+  permite_multiplas: false,
+  obrigatoria: false,
+  opcoes: [],
+};
 
 const QuestionManagement = () => {
   const [questions, setQuestions] = useState([]);
-  const [currentQuestion, setCurrentQuestion] = useState({
-    id_categoria: "",
-    tipo: "",
-    ordem_exibicao: "",
-    conteudo: "",
-    permite_multiplas: false,
-    obrigatoria: false,
-  });
+  const [currentQuestion, setCurrentQuestion] = useState(
+    INITIAL_QUESTION_STATE
+  );
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [currentTab, setCurrentTab] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
+  const [openQuestionForm, setOpenQuestionForm] = useState(false);
+  const [categories, setCategories] = useState([]);
   const { setTitle } = usePageTitle();
 
   useEffect(() => {
     setTitle("Gerenciador de Perguntas");
   }, [setTitle]);
-
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [questionToDelete, setQuestionToDelete] = useState(null);
-  const [openQuestionForm, setOpenQuestionForm] = useState(false);
-  const [categories, setCategories] = useState([]);
 
   const fetchCategories = async () => {
     categoriaService
@@ -120,23 +92,25 @@ const QuestionManagement = () => {
   }, [currentTab]);
 
   const handleAddQuestion = () => {
-    if (!currentQuestion.text.trim()) {
-      showSnackbar("Por favor, digite a pergunta", "error");
-      return;
-    }
-
-    const newQuestion = {
-      id: Date.now(),
-      text: currentQuestion.text,
-      type: currentQuestion.type,
-      isDescriptive: currentQuestion.isDescriptive,
-      createdAt: new Date().toISOString(),
-    };
-
-    const updatedQuestions = [...questions, newQuestion];
-    saveQuestions(updatedQuestions);
-    resetForm();
-    showSnackbar("Pergunta adicionada com sucesso!", "success");
+    perguntaService
+      .createPergunta({
+        id_categoria: currentQuestion.id_categoria,
+        tipo: currentQuestion.tipo,
+        ordem_exibicao: currentQuestion.ordem_exibicao,
+        conteudo: currentQuestion.conteudo,
+        permite_multiplas: currentQuestion.permite_multiplas,
+        obrigatoria: currentQuestion.obrigatoria,
+        opcoes: currentQuestion.opcoes,
+      })
+      .then(() => {
+        fetchQuestions();
+        resetForm();
+        showSnackbar("Pergunta adicionada com sucesso!", "success");
+      })
+      .catch((err) => {
+        console.error("Erro ao adicionar pergunta:", err);
+        showSnackbar("Erro ao adicionar pergunta", "error");
+      });
   };
 
   const handleUpdateQuestion = () => {
@@ -162,34 +136,8 @@ const QuestionManagement = () => {
     setOpenQuestionForm(true);
   };
 
-  const handleViewQuestion = (question) => {
-    setSelectedQuestion(question);
-    setViewDialogOpen(true);
-  };
-
-  const handleDeleteClick = (question) => {
-    setQuestionToDelete(question);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = () => {
-    if (questionToDelete) {
-      const updatedQuestions = questions.filter(
-        (q) => q.id !== questionToDelete.id
-      );
-      saveQuestions(updatedQuestions);
-      showSnackbar("Pergunta removida com sucesso!", "info");
-      setQuestionToDelete(null);
-    }
-  };
-
   const resetForm = () => {
-    setCurrentQuestion({
-      id: null,
-      text: "",
-      type: "estrutura",
-      isDescriptive: false,
-    });
+    setCurrentQuestion(INITIAL_QUESTION_STATE);
     setIsEditing(false);
   };
 
@@ -239,278 +187,33 @@ const QuestionManagement = () => {
         sx={{ display: "flex", gap: 4, height: "100%" }}
       >
         {/* Formulário de Adição/Edição */}
-        <QuestionForm
+        <QuestionFormDialog
           open={openQuestionForm}
           onClose={() => setOpenQuestionForm(false)}
           categories={categories}
           isEditing={isEditing}
           currentQuestion={currentQuestion}
           setCurrentQuestion={setCurrentQuestion}
+          resetForm={resetForm}
+          onAdd={handleAddQuestion}
+          onUpdate={handleUpdateQuestion}
         />
         {/*  Consulta de Perguntas */}
-        <Box sx={{ flex: "0 0 55.3333%", minHeight: "600px" }}>
-          <Paper elevation={3} sx={{ p: 3, width: "100%" }}>
-            <Box
-              sx={{
-                borderBottom: 1,
-                borderColor: "divider",
-                mb: 3,
-                width: "100%",
-              }}
-            >
-              <Tabs
-                value={currentTab}
-                onChange={(e, newValue) => setCurrentTab(newValue)}
-              >
-                <Tab
-                  label="Todas"
-                  value={0}
-                  sx={{ textTransform: "none", fontWeight: "bold" }}
-                />
-                {categories.map((category, index) => (
-                  <Tab
-                    key={category.id_categoria}
-                    label={category.nome}
-                    value={category.id_categoria}
-                    sx={{ textTransform: "none", fontWeight: "bold" }}
-                  />
-                ))}
-              </Tabs>
-            </Box>
-
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-                width: "100%",
-              }}
-            >
-              <Typography
-                variant="h5"
-                sx={{ fontWeight: "bold", color: SECONDARY_COLOR }}
-              >
-                Perguntas Cadastradas
-              </Typography>
-              <Chip
-                label={`${questions.length} pergunta(s)`}
-                sx={{
-                  bgcolor: PRIMARY_COLOR,
-                  color: "white",
-                  fontWeight: "bold",
-                }}
-              />
-            </Box>
-
-            <Divider sx={{ mb: 3 }} />
-
-            {questions.length === 0 ? (
-              <Box sx={{ textAlign: "center", py: 8 }}>
-                <FitnessCenterIcon
-                  sx={{ fontSize: 64, color: "#ccc", mb: 2 }}
-                />
-                <Typography variant="h6" color="textSecondary">
-                  Sem resultados
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {currentTab === 0
-                    ? "Comece adicionando sua primeira pergunta!"
-                    : `Nenhuma pergunta da categoria selecionada encontrada.`}
-                </Typography>
-              </Box>
-            ) : (
-              <Box sx={{ maxHeight: 600, overflow: "auto" }}>
-                {questions.map((question) => {
-                  return (
-                    <Card
-                      key={question.id}
-                      sx={{ mb: 2, borderLeft: `4px solid ${PRIMARY_COLOR}` }}
-                    >
-                      <CardContent>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                            mb: 1,
-                          }}
-                        >
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              fontSize: "1rem",
-                              flex: 1,
-                              color: SECONDARY_COLOR,
-                            }}
-                          >
-                            {question.conteudo}
-                          </Typography>
-                          <Box sx={{ display: "flex", gap: 0.5 }}>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleViewQuestion(question)}
-                              sx={{ color: PRIMARY_COLOR }}
-                            >
-                              <ViewIcon />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleEditQuestion(question)}
-                              sx={{ color: SECONDARY_COLOR }}
-                            >
-                              <EditIcon />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleDeleteClick(question)}
-                              sx={{ color: "#d32f2f" }}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Box>
-                        </Box>
-
-                        <Box
-                          sx={{
-                            display: "flex",
-                            gap: 1,
-                            flexWrap: "wrap",
-                            mt: 1,
-                          }}
-                        >
-                          {question.createdAt && (
-                            <Chip
-                              label={new Date(
-                                question.createdAt
-                              ).toLocaleDateString("pt-BR")}
-                              size="small"
-                              variant="outlined"
-                              sx={{
-                                borderColor: "#ccc",
-                                color: "#666",
-                                fontSize: "0.7rem",
-                              }}
-                            />
-                          )}
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </Box>
-            )}
-          </Paper>
-        </Box>
+        {questions.length > 0 ? (
+          <QuestionConsultList
+            questions={questions}
+            setCurrentQuestion={setCurrentQuestion}
+            currentTab={currentTab}
+            setCurrentTab={setCurrentTab}
+            categories={categories}
+            onEdit={handleEditQuestion}
+            // onView={handleViewQuestion}
+            // onDelete={handleDeleteQuestion}
+          />
+        ) : (
+          <LoadingSpinner />
+        )}
       </Box>
-      <Dialog
-        open={viewDialogOpen}
-        onClose={() => setViewDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            Detalhes da Pergunta
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          {selectedQuestion && (
-            <Box sx={{ mt: 2 }}>
-              <Typography
-                variant="body1"
-                sx={{ mb: 3, p: 2, bgcolor: LIGHT_BG, borderRadius: 1 }}
-              >
-                {selectedQuestion.conteudo}
-              </Typography>
-
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                <Box>
-                  <Typography variant="body2" color="textSecondary">
-                    Tipo:
-                  </Typography>
-                  <Chip
-                    label={selectedQuestion.tipo}
-                    size="small"
-                    sx={{ mt: 0.5 }}
-                  />
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="textSecondary">
-                    Categoria:
-                  </Typography>
-                  <Typography variant="body2">
-                    {selectedQuestion.categoria_nome}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="textSecondary">
-                    Obrigatória:
-                  </Typography>
-                  <Typography variant="body2">
-                    {selectedQuestion.obrigatoria ? "Sim" : "Não"}
-                  </Typography>
-                </Box>
-                {selectedQuestion.tipo === "multipla_escolha" ? (
-                  <Box>
-                    <Typography variant="body2" color="textSecondary">
-                      Permite Múltiplas Respostas:
-                    </Typography>
-                    <Typography variant="body2">
-                      {selectedQuestion.permite_multiplas ? "Sim" : "Não"}
-                    </Typography>
-                  </Box>
-                ) : (
-                  <></>
-                )}
-                {selectedQuestion.tipo === "multipla_escolha" ? (
-                  <Box>
-                    {selectedQuestion.opcoes &&
-                    selectedQuestion.opcoes.length > 0 ? (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="body2" color="textSecondary">
-                          Opções:
-                        </Typography>
-                        <ul>
-                          {selectedQuestion.opcoes.map((opcao, index) => (
-                            <li key={index}>
-                              <Typography variant="body1">
-                                {opcao.texto}
-                              </Typography>
-                            </li>
-                          ))}
-                        </ul>
-                      </Box>
-                    ) : (
-                      <Typography variant="body1" sx={{ mt: 2 }}>
-                        Nenhuma opção disponível.
-                      </Typography>
-                    )}
-                  </Box>
-                ) : (
-                  <></>
-                )}
-              </Box>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setViewDialogOpen(false)}>Fechar</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Componente de Confirmação para Excluir */}
-      <ModalDeleteQuestion
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Excluir Pergunta"
-        message="Tem certeza que deseja excluir esta pergunta?"
-        confirmText="Excluir Pergunta"
-        cancelText="Manter Pergunta"
-        itemName={questionToDelete?.text}
-        severity="error"
-      />
 
       {/* Snackbar for notifications */}
       <Snackbar
