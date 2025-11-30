@@ -421,42 +421,76 @@ const QuestionManagement = () => {
                 variant="body1"
                 sx={{ mb: 3, p: 2, bgcolor: LIGHT_BG, borderRadius: 1 }}
               >
-                {selectedQuestion.text}
+                {selectedQuestion.conteudo}
               </Typography>
 
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                <Box>
                   <Typography variant="body2" color="textSecondary">
                     Tipo:
                   </Typography>
                   <Chip
-                    icon={getTypeInfo(selectedQuestion.type)?.icon}
-                    label={getTypeInfo(selectedQuestion.type)?.label}
+                    label={selectedQuestion.tipo}
                     size="small"
                     sx={{ mt: 0.5 }}
                   />
-                </Grid>
-                <Grid item xs={6}>
+                </Box>
+                <Box>
                   <Typography variant="body2" color="textSecondary">
-                    Formato:
+                    Categoria:
                   </Typography>
-                  <Typography variant="body1">
-                    {selectedQuestion.isDescriptive ? "Descritiva" : "Objetiva"}
+                  <Typography variant="body2">
+                    {selectedQuestion.categoria_nome}
                   </Typography>
-                </Grid>
-                {selectedQuestion.createdAt && (
-                  <Grid item xs={12}>
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="textSecondary">
+                    Obrigatória:
+                  </Typography>
+                  <Typography variant="body2">
+                    {selectedQuestion.obrigatoria ? "Sim" : "Não"}
+                  </Typography>
+                </Box>
+                {selectedQuestion.tipo === "multipla_escolha" ? (
+                  <Box>
                     <Typography variant="body2" color="textSecondary">
-                      Criada em:
+                      Permite Múltiplas Respostas:
                     </Typography>
-                    <Typography variant="body1">
-                      {new Date(selectedQuestion.createdAt).toLocaleString(
-                        "pt-BR"
-                      )}
+                    <Typography variant="body2">
+                      {selectedQuestion.permite_multiplas ? "Sim" : "Não"}
                     </Typography>
-                  </Grid>
+                  </Box>
+                ) : (
+                  <></>
                 )}
-              </Grid>
+                {selectedQuestion.tipo === "multipla_escolha" ? (
+                  <Box>
+                    {selectedQuestion.opcoes &&
+                    selectedQuestion.opcoes.length > 0 ? (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="body2" color="textSecondary">
+                          Opções:
+                        </Typography>
+                        <ul>
+                          {selectedQuestion.opcoes.map((opcao, index) => (
+                            <li key={index}>
+                              <Typography variant="body1">
+                                {opcao.texto}
+                              </Typography>
+                            </li>
+                          ))}
+                        </ul>
+                      </Box>
+                    ) : (
+                      <Typography variant="body1" sx={{ mt: 2 }}>
+                        Nenhuma opção disponível.
+                      </Typography>
+                    )}
+                  </Box>
+                ) : (
+                  <></>
+                )}
+              </Box>
             </Box>
           )}
         </DialogContent>
