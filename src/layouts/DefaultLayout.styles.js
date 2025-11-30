@@ -19,5 +19,5 @@ export const Main = styled.main`
   padding: 1rem 2rem;
   transition: margin-left 0.1s ease-in-out !important;
   width: 100%;
-  height: calc(100vh - 5rem);
+  height: 100%;
 `;

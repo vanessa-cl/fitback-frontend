@@ -21,7 +21,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
       variant="persistent"
       hideBackdrop
     >
-      {console.log(activeLink)}
       <S.SidebarAccordion
         expanded={expanded === "panel1"}
         onChange={handleAccordionChange("panel1")}
@@ -102,7 +101,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             to="/gerenciar-perguntas"
             onClick={() => setActiveLink("/gerenciar-perguntas")}
           >
-            Gerenciar
+            Gerenciador
           </S.AccordionLink>
         </S.AccordionItem>
       </S.SidebarAccordion>

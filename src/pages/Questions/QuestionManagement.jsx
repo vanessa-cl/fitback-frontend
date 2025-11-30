@@ -217,22 +217,11 @@ const QuestionManagement = () => {
   return (
     <Box
       sx={{
-        p: 3,
-        maxWidth: 1400,
+        width: "100%",
         margin: "0 auto",
-        minHeight: "100vh",
       }}
     >
-      {/* Header */}
       <Box sx={{ p: 1, mb: 4, textAlign: "left" }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          gutterBottom
-          sx={{ color: SECONDARY_COLOR, fontWeight: "bold" }}
-        >
-          Gerenciador de Perguntas
-        </Typography>
         <Typography
           variant="h6"
           sx={{ color: "text.secondary", fontSize: "1.1rem" }}
@@ -240,11 +229,23 @@ const QuestionManagement = () => {
           Gerencie e crie perguntas para os questionários
         </Typography>
       </Box>
-
-      <Grid container spacing={4}>
-        {/* Left Side - Question Form */}
-        <Grid item xs={12} md={5}>
-          <Paper elevation={3} sx={{ p: 3, position: "sticky", top: 20 }}>
+      <Box
+        container
+        spacing={4}
+        sx={{ display: "flex", gap: 4, height: "100%" }}
+      >
+        {/* Formulário de Adição/Edição */}
+        <Box
+          sx={{ flex: "0 0 41.6667%", minHeight: "560px", maxHeight: "580px" }}
+        >
+          <Paper
+            elevation={3}
+            sx={{
+              p: 3,
+              position: "sticky",
+              top: 20,
+            }}
+          >
             <Typography
               variant="h5"
               gutterBottom
@@ -252,84 +253,95 @@ const QuestionManagement = () => {
             >
               {isEditing ? "Editar Pergunta" : "Nova Pergunta"}
             </Typography>
-
-            <Box component="form" sx={{ mt: 3 }}>
-              <TextField
-                fullWidth
-                label="Digite a pergunta"
-                value={currentQuestion.text}
-                onChange={(e) =>
-                  setCurrentQuestion({
-                    ...currentQuestion,
-                    text: e.target.value,
-                  })
-                }
-                multiline
-                rows={3}
-                placeholder="Ex: Como você avalia o estado dos equipamentos?"
-                sx={{ mb: 3 }}
-              />
-
-              <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Tipo de Pergunta</InputLabel>
-                <Select
-                  value={currentQuestion.type}
-                  label="Tipo de Pergunta"
+            <Box
+              component="form"
+              sx={{
+                mb: 4,
+                mt: 4,
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <TextField
+                  fullWidth
+                  label="Digite a pergunta"
+                  value={currentQuestion.text}
                   onChange={(e) =>
                     setCurrentQuestion({
                       ...currentQuestion,
-                      type: e.target.value,
+                      text: e.target.value,
                     })
                   }
-                >
-                  {questionTypes.map((type) => (
-                    <MenuItem key={type.value} value={type.value}>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        {type.icon}
-                        {type.label}
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  multiline
+                  rows={3}
+                  placeholder="Ex: Como você avalia o estado dos equipamentos?"
+                  sx={{ mb: 3 }}
+                />
 
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={currentQuestion.isDescriptive}
+                <FormControl fullWidth sx={{ mb: 3 }}>
+                  <InputLabel>Tipo de Pergunta</InputLabel>
+                  <Select
+                    value={currentQuestion.type}
+                    label="Tipo de Pergunta"
                     onChange={(e) =>
                       setCurrentQuestion({
                         ...currentQuestion,
-                        isDescriptive: e.target.checked,
+                        type: e.target.value,
                       })
                     }
-                    sx={{
-                      "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: PRIMARY_COLOR,
-                      },
-                      "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                        { backgroundColor: PRIMARY_COLOR },
-                    }}
-                  />
-                }
-                label={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    {currentQuestion.isDescriptive ? (
-                      <SubjectIcon sx={{ color: PRIMARY_COLOR }} />
-                    ) : (
-                      <ListIcon sx={{ color: SECONDARY_COLOR }} />
-                    )}
-                    <Typography>
-                      {currentQuestion.isDescriptive
-                        ? "Pergunta Descritiva"
-                        : "Pergunta Objetiva"}
-                    </Typography>
-                  </Box>
-                }
-                sx={{ mb: 4 }}
-              />
+                  >
+                    {questionTypes.map((type) => (
+                      <MenuItem key={type.value} value={type.value}>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          {type.icon}
+                          {type.label}
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={currentQuestion.isDescriptive}
+                      onChange={(e) =>
+                        setCurrentQuestion({
+                          ...currentQuestion,
+                          isDescriptive: e.target.checked,
+                        })
+                      }
+                      sx={{
+                        "& .MuiSwitch-switchBase.Mui-checked": {
+                          color: PRIMARY_COLOR,
+                        },
+                        "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                          { backgroundColor: PRIMARY_COLOR },
+                      }}
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      {currentQuestion.isDescriptive ? (
+                        <SubjectIcon sx={{ color: PRIMARY_COLOR }} />
+                      ) : (
+                        <ListIcon sx={{ color: SECONDARY_COLOR }} />
+                      )}
+                      <Typography>
+                        {currentQuestion.isDescriptive
+                          ? "Pergunta Descritiva"
+                          : "Pergunta Objetiva"}
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ mb: 4 }}
+                />
+              </div>
 
               <Box sx={{ display: "flex", gap: 2 }}>
                 {isEditing ? (
@@ -380,49 +392,19 @@ const QuestionManagement = () => {
                 )}
               </Box>
             </Box>
-
-            {/* Estatísticas */}
-            <Paper elevation={1} sx={{ p: 2, mt: 3, bgcolor: LIGHT_BG }}>
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{ fontSize: "1rem", fontWeight: "bold" }}
-              >
-                Perguntas
-              </Typography>
-              <List dense>
-                <ListItem>
-                  <ListItemText
-                    primary={`Total: ${questions.length} perguntas`}
-                    secondary={`Estrutura: ${
-                      questions.filter((q) => q.type === "estrutura").length
-                    } | Limpeza: ${
-                      questions.filter((q) => q.type === "limpeza").length
-                    } | Equipe: ${
-                      questions.filter((q) => q.type === "equipe").length
-                    }`}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText
-                    primary="Tipos de Resposta"
-                    secondary={`Objetivas: ${
-                      questions.filter((q) => !q.isDescriptive).length
-                    } | Descritivas: ${
-                      questions.filter((q) => q.isDescriptive).length
-                    }`}
-                  />
-                </ListItem>
-              </List>
-            </Paper>
           </Paper>
-        </Grid>
-
-        {/* Right Side - Questions List */}
-        <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ p: 3 }}>
-            {/* Tabs para filtro */}
-            <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+        </Box>
+        {/*  Consulta de Perguntas */}
+        <Box sx={{ flex: "0 0 55.3333%", minHeight: "600px" }}>
+          <Paper elevation={3} sx={{ p: 3, width: "100%" }}>
+            <Box
+              sx={{
+                borderBottom: 1,
+                borderColor: "divider",
+                mb: 3,
+                width: "100%",
+              }}
+            >
               <Tabs
                 value={currentTab}
                 onChange={(e, newValue) => setCurrentTab(newValue)}
@@ -440,6 +422,7 @@ const QuestionManagement = () => {
                 justifyContent: "space-between",
                 alignItems: "center",
                 mb: 3,
+                width: "100%",
               }}
             >
               <Typography
@@ -601,10 +584,8 @@ const QuestionManagement = () => {
               </Box>
             )}
           </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Dialog para Visualizar Pergunta */}
+        </Box>
+      </Box>
       <Dialog
         open={viewDialogOpen}
         onClose={() => setViewDialogOpen(false)}
