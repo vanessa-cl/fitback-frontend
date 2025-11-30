@@ -29,6 +29,7 @@ import {
   DialogActions,
   Tabs,
   Tab,
+  Menu,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -45,6 +46,12 @@ import {
 } from "@mui/icons-material";
 import ModalDeleteQuestion from "../../components/Modal/ModalDeleteQuestion";
 import { usePageTitle } from "../../context/PageTitleContext";
+import categoriaService from "../../services/categoriaService";
+
+const PRIMARY_COLOR = "#B25E09";
+const DARK_PRIMARY = "#914d07";
+const LIGHT_BG = "#f5f5f5";
+const SECONDARY_COLOR = "#424242";
 
 const QuestionManagement = () => {
   const [questions, setQuestions] = useState([]);
@@ -69,15 +76,25 @@ const QuestionManagement = () => {
     setTitle("Gerenciador de Perguntas");
   }, [setTitle]);
 
-  // Estados para o diálogo de confirmação
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState(null);
+  const [categories, setCategories] = useState([]);
 
-  // Paleta Focada: Laranja (Marrom) e Cinza
-  const PRIMARY_COLOR = "#B25E09";
-  const DARK_PRIMARY = "#914d07";
-  const LIGHT_BG = "#f5f5f5";
-  const SECONDARY_COLOR = "#424242";
+  const fetchCategories = async () => {
+    categoriaService
+      .getAllCategorias()
+      .then((response) => {
+        console.log("Categorias carregadas:", response.data);
+        setCategories(response.data);
+      })
+      .catch((error) => {
+        console.error("Erro ao carregar categorias:", error);
+      });
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const questionTypes = [
     {
@@ -100,7 +117,6 @@ const QuestionManagement = () => {
     },
   ];
 
-  // Carregar perguntas do localStorage (simulando backend)
   useEffect(() => {
     const savedQuestions = localStorage.getItem("academy-questions");
     if (savedQuestions) {
@@ -108,7 +124,6 @@ const QuestionManagement = () => {
     }
   }, []);
 
-  // Salvar perguntas no localStorage
   const saveQuestions = (updatedQuestions) => {
     localStorage.setItem("academy-questions", JSON.stringify(updatedQuestions));
     setQuestions(updatedQuestions);
@@ -293,13 +308,14 @@ const QuestionManagement = () => {
                       })
                     }
                   >
-                    {questionTypes.map((type) => (
-                      <MenuItem key={type.value} value={type.value}>
+                    <MenuItem value="">Selecione a categoria</MenuItem>
+                    {categories.map((category) => (
+                      <MenuItem key={category.id_categoria} value={category.id_categoria}>
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: 1 }}
                         >
-                          {type.icon}
-                          {type.label}
+                          {/* {category.icon} */}
+                          {category.nome}
                         </Box>
                       </MenuItem>
                     ))}
