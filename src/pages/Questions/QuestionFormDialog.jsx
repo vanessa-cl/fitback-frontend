@@ -236,7 +236,10 @@ const QuestionFormDialog = ({
                 <Button
                   variant="contained"
                   startIcon={<SaveIcon />}
-                  // onClick={handleUpdateQuestion}
+                  onClick={() => {
+                    onUpdate();
+                    onClose();
+                  }}
                   sx={{
                     flex: 1,
                     py: 1.5,

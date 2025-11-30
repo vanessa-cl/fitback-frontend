@@ -18,8 +18,8 @@ const QuestionsOptions = ({
   initialOptions,
 }) => {
   const [options, setOptions] = useState([
-    { id: 1, texto: "" },
-    { id: 2, texto: "" },
+    { id_opcao: 1, texto: "" },
+    { id_opcao: 2, texto: "" },
   ]);
 
   useEffect(() => {
@@ -31,21 +31,21 @@ const QuestionsOptions = ({
 
   const handleChange = (id, value) => {
     const newOptions = options.map((o) =>
-      o.id === id ? { ...o, texto: value } : o
+      o.id_opcao === id ? { ...o, texto: value } : o
     );
     setOptions(newOptions);
     onChange(newOptions);
   };
 
   const addOption = () => {
-    const newOption = { id: options.length + 1, texto: "" };
+    const newOption = { id_opcao: options.length + 1, texto: "" };
     const newOptions = [...options, newOption];
     setOptions(newOptions);
     onChange(newOptions);
   };
 
   const removeOption = (id) => {
-    const newOptions = options.filter((o) => o.id !== id);
+    const newOptions = options.filter((o) => o.id_opcao !== id);
     setOptions(newOptions);
     onChange(newOptions);
   };
@@ -59,7 +59,7 @@ const QuestionsOptions = ({
 
       {options.map((option) => (
         <Box
-          key={option.id}
+          key={option.id_opcao}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -73,10 +73,13 @@ const QuestionsOptions = ({
             fullWidth
             placeholder="Digite uma opção"
             value={option.texto}
-            onChange={(e) => handleChange(option.id, e.target.value)}
+            onChange={(e) => handleChange(option.id_opcao, e.target.value)}
           />
 
-          <IconButton color="error" onClick={() => removeOption(option.id)}>
+          <IconButton
+            color="error"
+            onClick={() => removeOption(option.id_opcao)}
+          >
             <DeleteIcon />
           </IconButton>
         </Box>

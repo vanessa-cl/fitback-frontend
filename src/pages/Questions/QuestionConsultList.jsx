@@ -37,21 +37,21 @@ const QuestionConsultList = ({
     setViewDialogOpen(true);
   };
 
-  const handleDeleteQuestion = (question) => {
-    setQuestionToDelete(question);
-    setDeleteDialogOpen(true);
-  };
+  // const handleDeleteQuestion = (question) => {
+  //   setQuestionToDelete(question);
+  //   setDeleteDialogOpen(true);
+  // };
 
-  const handleDeleteConfirm = () => {
-    if (questionToDelete) {
-      const updatedQuestions = questions.filter(
-        (q) => q.id !== questionToDelete.id
-      );
-      saveQuestions(updatedQuestions);
-      showSnackbar("Pergunta removida com sucesso!", "info");
-      setQuestionToDelete(null);
-    }
-  };
+  // const handleDeleteConfirm = () => {
+  //   if (questionToDelete) {
+  //     const updatedQuestions = questions.filter(
+  //       (q) => q.id !== questionToDelete.id
+  //     );
+  //     saveQuestions(updatedQuestions);
+  //     showSnackbar("Pergunta removida com sucesso!", "info");
+  //     setQuestionToDelete(null);
+  //   }
+  // };
 
   return (
     <Box sx={{ minHeight: "600px", width: "100%" }}>
@@ -153,21 +153,21 @@ const QuestionConsultList = ({
                       <Box sx={{ display: "flex", gap: 0.5 }}>
                         <IconButton
                           size="small"
-                          onClick={() => handleViewQuestion(question)}
+                          onClick={() => onView(question)}
                           sx={{ color: PRIMARY_COLOR }}
                         >
                           <ViewIcon />
                         </IconButton>
                         <IconButton
                           size="small"
-                          onClick={() => handleEditQuestion(question)}
+                          onClick={() => onEdit(question)}
                           sx={{ color: SECONDARY_COLOR }}
                         >
                           <EditIcon />
                         </IconButton>
                         <IconButton
                           size="small"
-                          onClick={() => handleDeleteClick(question)}
+                          onClick={() => onDelete(question)}
                           sx={{ color: "#d32f2f" }}
                         >
                           <DeleteIcon />

@@ -114,20 +114,25 @@ const QuestionManagement = () => {
   };
 
   const handleUpdateQuestion = () => {
-    if (!currentQuestion.text.trim()) {
-      showSnackbar("Por favor, digite a pergunta", "error");
-      return;
-    }
-
-    const updatedQuestions = questions.map((q) =>
-      q.id === currentQuestion.id
-        ? { ...currentQuestion, updatedAt: new Date().toISOString() }
-        : q
-    );
-
-    saveQuestions(updatedQuestions);
-    resetForm();
-    showSnackbar("Pergunta atualizada com sucesso!", "success");
+    perguntaService
+      .updatePergunta(currentQuestion.id_pergunta, {
+        id_categoria: currentQuestion.id_categoria,
+        tipo: currentQuestion.tipo,
+        ordem_exibicao: currentQuestion.ordem_exibicao,
+        conteudo: currentQuestion.conteudo,
+        permite_multiplas: currentQuestion.permite_multiplas,
+        obrigatoria: currentQuestion.obrigatoria,
+        opcoes: currentQuestion.opcoes,
+      })
+      .then(() => {
+        fetchQuestions();
+        resetForm();
+        showSnackbar("Pergunta atualizada com sucesso!", "success");
+      })
+      .catch((err) => {
+        console.error("Erro ao atualizar pergunta:", err);
+        showSnackbar("Erro ao atualizar pergunta", "error");
+      });
   };
 
   const handleEditQuestion = (question) => {
