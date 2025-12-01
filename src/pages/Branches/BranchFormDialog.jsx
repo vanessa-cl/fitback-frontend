@@ -30,11 +30,8 @@ const BranchFormDialog = ({
   currentBranch,
   setCurrentBranch,
   isEditing,
-  setIsEditing,
   handleAdd,
   handleUpdate,
-  branches,
-  setBranches,
   resetForm,
 }) => {
   const checkValidFields = () => {

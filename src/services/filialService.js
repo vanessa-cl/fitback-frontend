@@ -26,7 +26,7 @@ class FilialService extends ApiService {
   }
 
   searchFiliais(termo) {
-    return this.get(`/buscar/${termo}`);
+    return this.get(`/buscar/?termo=${termo}`);
   }
 }
 

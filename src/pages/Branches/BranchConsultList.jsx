@@ -25,11 +25,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../utils/colors";
 
 const BranchConsultList = ({
-  query,
-  setQuery,
-  filtered,
+  branches,
   handleEdit,
   handleDelete,
+  searchTerm,
+  setSearchTerm,
 }) => {
   const [openViewDialog, setOpenViewDialog] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState(null);
@@ -61,8 +61,8 @@ const BranchConsultList = ({
           <TextField
             size="small"
             placeholder="Pesquisar por nome"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -75,7 +75,7 @@ const BranchConsultList = ({
         </Box>
 
         <Divider sx={{ mb: 2 }} />
-        {filtered.length === 0 ? (
+        {branches.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
             <LocationOnIcon sx={{ fontSize: 56, color: "#ccc" }} />
             <Typography variant="h6" color="textSecondary">
@@ -95,15 +95,15 @@ const BranchConsultList = ({
             }}
           >
             <Grid container spacing={2}>
-              {filtered.map((branch) => (
+              {branches.map((branch) => (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={branch.id_filial}>
                   <Card
                     sx={{
                       borderLeft: `4px solid ${PRIMARY_COLOR}`,
-                      mb: 2,
                       height: "100%",
                       display: "flex",
                       flexDirection: "column",
+                      pb: 0,
                     }}
                     key={branch.id_filial}
                   >

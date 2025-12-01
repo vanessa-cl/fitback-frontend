@@ -1,21 +1,6 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Snackbar,
-  Alert,
-} from "@mui/material";
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Cancel as CancelIcon,
-} from "@mui/icons-material";
-import { PRIMARY_COLOR, DARK_PRIMARY } from "../../utils/colors";
+import { Box, Typography, Button, Snackbar, Alert } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 import { usePageTitle } from "../../context/PageTitleContext";
 import BranchConsultList from "./BranchConsultList";
@@ -30,6 +15,7 @@ const INITIAL_FORM_STATE = {
 };
 
 const BranchManagement = () => {
+  const [searchTerm, setSearchTerm] = useState("");
   const [branches, setBranches] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentBranch, setCurrentBranch] = useState(INITIAL_FORM_STATE);
@@ -40,7 +26,6 @@ const BranchManagement = () => {
     message: "",
     severity: "success",
   });
-  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const { setTitle } = usePageTitle();
   const [openBranchForm, setOpenBranchForm] = useState(false);
@@ -69,15 +54,25 @@ const BranchManagement = () => {
     fetchBranches();
   }, []);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("gym-branches");
-    if (saved) setBranches(JSON.parse(saved));
-  }, []);
-
-  const persist = (updated) => {
-    localStorage.setItem("gym-branches", JSON.stringify(updated));
-    setBranches(updated);
+  const fetchBranchesByFilter = async (filter) => {
+    await filialService
+      .searchFiliais(filter)
+      .then((res) => {
+        setBranches(res.data);
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar filiais:", error);
+        showSnackbar("Erro ao buscar filiais.", "error");
+      });
   };
+
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      fetchBranches();
+    } else {
+      fetchBranchesByFilter(searchTerm);
+    }
+  }, [searchTerm]);
 
   const resetForm = () => {
     setCurrentBranch(INITIAL_FORM_STATE);
@@ -158,16 +153,6 @@ const BranchManagement = () => {
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
-  const filtered = branches.filter((b) => {
-    const q = query.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      b.name.toLowerCase().includes(q) ||
-      b.city?.toLowerCase().includes(q) ||
-      b.manager?.toLowerCase().includes(q)
-    );
-  });
-
   return (
     <Box sx={{ maxWidth: 1200, margin: "0 auto" }}>
       {loading && <LoadingSpinner />}
@@ -198,11 +183,11 @@ const BranchManagement = () => {
         </Button>
       </Box>
       <BranchConsultList
-        query={query}
-        setQuery={setQuery}
-        filtered={filtered}
+        branches={branches}
         handleEdit={handleEditBranch}
         handleDelete={handleDeleteBranch}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
       />
       {/* Modal de Formulário de Filial */}
       {openBranchForm ? (
@@ -212,11 +197,8 @@ const BranchManagement = () => {
           currentBranch={currentBranch}
           setCurrentBranch={setCurrentBranch}
           isEditing={isEditing}
-          setIsEditing={setIsEditing}
           handleAdd={handleAddBranch}
           handleUpdate={handleUpdateBranch}
-          branches={branches}
-          setBranches={setBranches}
           resetForm={resetForm}
         />
       ) : (
