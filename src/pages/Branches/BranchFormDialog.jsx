@@ -1,164 +1,200 @@
-<Grid container spacing={4}>
-        <Grid item xs={12} md={5}>
-          <Paper elevation={3} sx={{ p: 3, position: "sticky", top: 20 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: SECONDARY_COLOR, mb: 2 }}
-            >
-              {isEditing ? "Editar Filial" : "Nova Filial"}
-            </Typography>
+import React from "react";
+("react");
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  FormControlLabel,
+  Switch,
+  InputAdornment,
+  Dialog,
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Close as CloseIcon,
+} from "@mui/icons-material";
+import {
+  PRIMARY_COLOR,
+  SECONDARY_COLOR,
+  DARK_PRIMARY,
+} from "../../utils/colors";
 
-            <Box component="form" noValidate autoComplete="off">
-              <TextField
-                fullWidth
-                label="Nome da Filial"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                sx={{ mb: 2 }}
-              />
+const BranchFormDialog = ({
+  open,
+  onClose,
+  form,
+  setForm,
+  isEditing,
+  setIsEditing,
+  handleAdd,
+  handleUpdate,
+  branches,
+  setBranches,
+  resetForm,
+}) => {
 
-              <TextField
-                fullWidth
-                label="Endereço"
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-                sx={{ mb: 2 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LocationOnIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+  const checkValidFields = () => {
+    const { nome, endereco, status } = form;
+    return nome.trim() !== "" && endereco.trim() !== "" && status.trim() !== "";
+  }
 
-              <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid item xs={6}>
-                  <TextField
-                    fullWidth
-                    label="Cidade"
-                    value={form.city}
-                    onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    fullWidth
-                    label="Estado"
-                    value={form.state}
-                    onChange={(e) =>
-                      setForm({ ...form, state: e.target.value })
-                    }
-                  />
-                </Grid>
-              </Grid>
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <Box sx={{ flex: "0 0 41.6667%", p: 4 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            mb: 2,
+            position: "relative",
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{ fontWeight: "bold", color: SECONDARY_COLOR }}
+          >
+            {isEditing ? "Editar Filial" : "Nova Filial"}
+          </Typography>
+          <CloseIcon
+            onClick={() => {
+              onClose();
+              resetForm();
+            }}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              cursor: "pointer",
+              color: SECONDARY_COLOR,
+              marginBottom: "8.4px",
+            }}
+          />
+        </Box>
+        <Box
+          sx={{
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+          component="form"
+          noValidate
+          autoComplete="off"
+        >
+          <Box sx={{ gap: 2, mb: 4, display: "flex", flexDirection: "column" }}>
+            <TextField
+              fullWidth
+              label="Nome da Filial"
+              value={form.nome}
+              onChange={(e) => setForm({ ...form, nome: e.target.value })}
+            />
+            <TextField
+              fullWidth
+              label="Endereço Completo"
+              value={form.endereco}
+              onChange={(e) => setForm({ ...form, endereco: e.target.value })}
+              multiline
+              rows={3}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={form.status === "ativo"}
+                  onChange={(e) =>
+                    setForm({ ...form, status: e.target.checked ? "ativo" : "inativo" })
+                  }
+                  sx={{
+                    "& .MuiSwitch-switchBase.Mui-checked": {
+                      color: PRIMARY_COLOR,
+                    },
+                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                      backgroundColor: PRIMARY_COLOR,
+                    },
+                  }}
+                />
+              }
+              label={form.status === "ativo" ? "Ativa" : "Inativa"}
+              sx={{ mb: 2, mr: 0, width: "100%" }}
+            />
+          </Box>
 
-              <TextField
-                fullWidth
-                label="Telefone"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                sx={{ mb: 2 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PhoneIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+          <Box sx={{ display: "flex", gap: 2 }}>
+            {isEditing ? (
+              <>
+                <Button
+                  startIcon={<SaveIcon />}
+                  variant="contained"
+                  onClick={handleUpdate}
+                  sx={{
+                    flex: 1,
+                    bgcolor: PRIMARY_COLOR,
+                    "&:hover": { bgcolor: DARK_PRIMARY },
+                  }}
+                >
+                  Salvar
+                </Button>
+                <Button
+                  startIcon={<CancelIcon />}
+                  variant="outlined"
+                  onClick={resetForm}
+                  sx={{
+                    flex: 1,
+                    borderColor: SECONDARY_COLOR,
+                    color: SECONDARY_COLOR,
+                  }}
+                >
+                  Cancelar
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outlined"
+                  startIcon={<CancelIcon />}
+                  onClick={() => {
+                    onClose();
+                    resetForm();
+                  }}
+                  sx={{
+                    flex: 1,
+                    py: 1.5,
+                    borderColor: SECONDARY_COLOR,
+                    color: SECONDARY_COLOR,
+                    width: "50%",
+                  }}
+                >
+                  Cancelar
+                </Button>
 
-              <TextField
-                fullWidth
-                label="Gerente responsável"
-                value={form.manager}
-                onChange={(e) => setForm({ ...form, manager: e.target.value })}
-                sx={{ mb: 2 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <AccountIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+                <Button
+                  startIcon={<AddIcon />}
+                  variant="contained"
+                  onClick={handleAdd}
+                  fullWidth
+                  sx={{
+                    py: 1.5,
+                    bgcolor: PRIMARY_COLOR,
+                    "&:hover": { bgcolor: DARK_PRIMARY },
+                    fontSize: "1.1rem",
+                    width: "50%",
+                  }}
+                  disabled={!checkValidFields()}
+                >
+                  Adicionar Filial
+                </Button>
+              </>
+            )}
+          </Box>
+        </Box>
+      </Box>
+    </Dialog>
+  );
+};
 
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={form.isActive}
-                    onChange={(e) =>
-                      setForm({ ...form, isActive: e.target.checked })
-                    }
-                    sx={{
-                      "& .MuiSwitch-switchBase.Mui-checked": {
-                        color: PRIMARY_COLOR,
-                      },
-                      "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                        { backgroundColor: PRIMARY_COLOR },
-                    }}
-                  />
-                }
-                label={form.isActive ? "Ativa" : "Inativa"}
-                sx={{ mb: 2 }}
-              />
-
-              <Box sx={{ display: "flex", gap: 2 }}>
-                {isEditing ? (
-                  <>
-                    <Button
-                      startIcon={<SaveIcon />}
-                      variant="contained"
-                      onClick={handleUpdate}
-                      sx={{
-                        flex: 1,
-                        bgcolor: PRIMARY_COLOR,
-                        "&:hover": { bgcolor: DARK_PRIMARY },
-                      }}
-                    >
-                      Salvar
-                    </Button>
-                    <Button
-                      startIcon={<CancelIcon />}
-                      variant="outlined"
-                      onClick={resetForm}
-                      sx={{
-                        flex: 1,
-                        borderColor: SECONDARY_COLOR,
-                        color: SECONDARY_COLOR,
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    startIcon={<AddIcon />}
-                    variant="contained"
-                    onClick={handleAdd}
-                    fullWidth
-                    sx={{
-                      bgcolor: PRIMARY_COLOR,
-                      "&:hover": { bgcolor: DARK_PRIMARY },
-                    }}
-                  >
-                    Adicionar Filial
-                  </Button>
-                )}
-              </Box>
-
-              {/* <Paper elevation={1} sx={{ p: 2, mt: 3, bgcolor: LIGHT_BG }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                  Resumo
-                </Typography>
-                <Typography variant="body2">
-                  Total de filiais: {branches.length}
-                </Typography>
-                <Typography variant="body2">
-                  Filiais ativas: {branches.filter((b) => b.isActive).length}
-                </Typography>
-              </Paper> */}
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+export default BranchFormDialog;

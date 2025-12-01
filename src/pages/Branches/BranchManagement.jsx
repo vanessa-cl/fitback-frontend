@@ -1,63 +1,37 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
-  Paper,
   Typography,
-  TextField,
   Button,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Switch,
-  FormControlLabel,
   Snackbar,
   Alert,
-  Divider,
-  InputAdornment,
 } from "@mui/material";
 import {
   Add as AddIcon,
-  Edit as EditIcon,
   Delete as DeleteIcon,
-  Visibility as ViewIcon,
-  Search as SearchIcon,
-  Save as SaveIcon,
   Cancel as CancelIcon,
-  LocationOn as LocationOnIcon,
-  Phone as PhoneIcon,
-  AccountCircle as AccountIcon,
 } from "@mui/icons-material";
-import {
-  PRIMARY_COLOR,
-  SECONDARY_COLOR,
-  DARK_PRIMARY,
-  LIGHT_BG,
-} from "../../utils/colors";
+import { PRIMARY_COLOR, DARK_PRIMARY } from "../../utils/colors";
 import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 import { usePageTitle } from "../../context/PageTitleContext";
 import BranchConsultList from "./BranchConsultList";
 import filialService from "../../services/filialService";
+import BranchFormDialog from "./BranchFormDialog";
+
+const INITIAL_FORM_STATE = {
+  nome: "",
+  endereco: "",
+  status: "ativo",
+};
 
 const BranchManagement = () => {
   const [branches, setBranches] = useState([]);
-  const [form, setForm] = useState({
-    id: null,
-    name: "",
-    address: "",
-    city: "",
-    state: "",
-    phone: "",
-    manager: "",
-    isActive: true,
-  });
+  const [form, setForm] = useState(INITIAL_FORM_STATE);
   const [isEditing, setIsEditing] = useState(false);
-  const [viewBranch, setViewBranch] = useState(null);
   const [deleteBranch, setDeleteBranch] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -68,6 +42,7 @@ const BranchManagement = () => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const { setTitle } = usePageTitle();
+  const [openBranchForm, setOpenBranchForm] = useState(false);
 
   useEffect(() => {
     setTitle("Gerenciador de Filiais");
@@ -75,7 +50,8 @@ const BranchManagement = () => {
 
   const fetchBranches = async () => {
     setLoading(true);
-    filialService.getAllFiliais()
+    await filialService
+      .getAllFiliais()
       .then((response) => {
         setBranches(response.data);
       })
@@ -86,7 +62,7 @@ const BranchManagement = () => {
       .finally(() => {
         setLoading(false);
       });
-  }
+  };
 
   useEffect(() => {
     fetchBranches();
@@ -122,19 +98,23 @@ const BranchManagement = () => {
     return null;
   };
 
-  const handleAdd = () => {
-    const err = validate();
-    if (err) return showSnackbar(err, "error");
-
-    const newBranch = {
-      ...form,
-      id: Date.now(),
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [...branches, newBranch];
-    persist(updated);
-    resetForm();
-    showSnackbar("Filial adicionada com sucesso!", "success");
+  const handleAddBranch = async () => {
+    setLoading(true);
+    await filialService
+      .createFilial(form)
+      .then((res) => {
+        fetchBranches();
+        showSnackbar("Filial adicionada com sucesso!", "success");
+        setOpenBranchForm(false);
+        resetForm();
+      })
+      .catch((err) => {
+        console.error("Erro ao adicionar filial:", err);
+        showSnackbar("Erro ao adicionar filial.", "error");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const handleUpdate = () => {
@@ -208,18 +188,35 @@ const BranchManagement = () => {
         <Button
           sx={{ width: "260px" }}
           variant="contained"
-          // onClick={() => setOpenQuestionForm(true)}
+          onClick={() => setOpenBranchForm(true)}
         >
           <AddIcon />
           Adicionar Filial
         </Button>
       </Box>
-      <BranchConsultList 
+      <BranchConsultList
         query={query}
         setQuery={setQuery}
         filtered={filtered}
       />
-      
+      {/* Modal de Formulário de Filial */}
+      {openBranchForm ? (
+        <BranchFormDialog
+          open={openBranchForm}
+          onClose={() => setOpenBranchForm(false)}
+          form={form}
+          setForm={setForm}
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          handleAdd={handleAddBranch}
+          handleUpdate={handleUpdate}
+          branches={branches}
+          setBranches={setBranches}
+          resetForm={resetForm}
+        />
+      ) : (
+        <></>
+      )}
 
       {/* Delete Confirmation */}
       <Dialog
