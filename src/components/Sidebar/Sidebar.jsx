@@ -105,6 +105,28 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
           </S.AccordionLink>
         </S.AccordionItem>
       </S.SidebarAccordion>
+      <S.SidebarAccordion
+        expanded={expanded === "panel4"}
+        onChange={handleAccordionChange("panel4")}
+      >
+        <S.AccordionLabel
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel4a-content"
+          id="panel4a-header"
+          expanded={expanded === "panel4"}
+        >
+          <p>Filiais</p>
+        </S.AccordionLabel>
+        <S.AccordionItem>
+          <S.AccordionLink
+            selected={activeLink === "/gerenciar-filiais"}
+            to="/gerenciar-filiais"
+            onClick={() => setActiveLink("/gerenciar-filiais")}
+          >
+            Gerenciador
+          </S.AccordionLink>
+        </S.AccordionItem>
+      </S.SidebarAccordion>
     </S.SidebarWrapper>
   );
 };
