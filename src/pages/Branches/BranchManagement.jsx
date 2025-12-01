@@ -30,8 +30,8 @@ const INITIAL_FORM_STATE = {
 
 const BranchManagement = () => {
   const [branches, setBranches] = useState([]);
-  const [form, setForm] = useState(INITIAL_FORM_STATE);
   const [isEditing, setIsEditing] = useState(false);
+  const [currentBranch, setCurrentBranch] = useState(INITIAL_FORM_STATE);
   const [deleteBranch, setDeleteBranch] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -79,16 +79,7 @@ const BranchManagement = () => {
   };
 
   const resetForm = () => {
-    setForm({
-      id: null,
-      name: "",
-      address: "",
-      city: "",
-      state: "",
-      phone: "",
-      manager: "",
-      isActive: true,
-    });
+    setCurrentBranch(INITIAL_FORM_STATE);
     setIsEditing(false);
   };
 
@@ -117,22 +108,29 @@ const BranchManagement = () => {
       });
   };
 
-  const handleUpdate = () => {
-    const err = validate();
-    if (err) return showSnackbar(err, "error");
-
-    const updated = branches.map((b) =>
-      b.id === form.id ? { ...form, updatedAt: new Date().toISOString() } : b
-    );
-    persist(updated);
-    resetForm();
-    showSnackbar("Filial atualizada com sucesso!", "success");
+  const handleUpdateBranch = async () => {
+    setLoading(true);
+    await filialService
+      .updateFilial(currentBranch.id_filial, currentBranch)
+      .then(() => {
+        fetchBranches();
+        showSnackbar("Filial atualizada com sucesso!", "success");
+        setOpenBranchForm(false);
+        resetForm();
+      })
+      .catch((err) => {
+        console.error("Erro ao atualizar filial:", err);
+        showSnackbar("Erro ao atualizar filial.", "error");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
-  const handleEdit = (branch) => {
-    setForm({ ...branch });
+  const handleEditBranch = (branch) => {
+    setCurrentBranch(branch);
     setIsEditing(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setOpenBranchForm(true);
   };
 
   const handleDeleteClick = (branch) => {
@@ -198,18 +196,19 @@ const BranchManagement = () => {
         query={query}
         setQuery={setQuery}
         filtered={filtered}
+        handleEdit={handleEditBranch}
       />
       {/* Modal de Formulário de Filial */}
       {openBranchForm ? (
         <BranchFormDialog
           open={openBranchForm}
           onClose={() => setOpenBranchForm(false)}
-          form={form}
-          setForm={setForm}
+          currentBranch={currentBranch}
+          setCurrentBranch={setCurrentBranch}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           handleAdd={handleAddBranch}
-          handleUpdate={handleUpdate}
+          handleUpdate={handleUpdateBranch}
           branches={branches}
           setBranches={setBranches}
           resetForm={resetForm}

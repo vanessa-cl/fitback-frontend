@@ -24,7 +24,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../utils/colors";
 
-const BranchConsultList = ({ query, setQuery, filtered }) => {
+const BranchConsultList = ({ query, setQuery, filtered, handleEdit, handleDelete }) => {
   const [openViewDialog, setOpenViewDialog] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState(null);
 

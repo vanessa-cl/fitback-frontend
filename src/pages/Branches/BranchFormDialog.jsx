@@ -27,8 +27,8 @@ import {
 const BranchFormDialog = ({
   open,
   onClose,
-  form,
-  setForm,
+  currentBranch,
+  setCurrentBranch,
   isEditing,
   setIsEditing,
   handleAdd,
@@ -37,11 +37,10 @@ const BranchFormDialog = ({
   setBranches,
   resetForm,
 }) => {
-
   const checkValidFields = () => {
-    const { nome, endereco, status } = form;
+    const { nome, endereco, status } = currentBranch;
     return nome.trim() !== "" && endereco.trim() !== "" && status.trim() !== "";
-  }
+  };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -91,23 +90,30 @@ const BranchFormDialog = ({
             <TextField
               fullWidth
               label="Nome da Filial"
-              value={form.nome}
-              onChange={(e) => setForm({ ...form, nome: e.target.value })}
+              value={currentBranch.nome}
+              onChange={(e) =>
+                setCurrentBranch({ ...currentBranch, nome: e.target.value })
+              }
             />
             <TextField
               fullWidth
               label="Endereço Completo"
-              value={form.endereco}
-              onChange={(e) => setForm({ ...form, endereco: e.target.value })}
+              value={currentBranch.endereco}
+              onChange={(e) =>
+                setCurrentBranch({ ...currentBranch, endereco: e.target.value })
+              }
               multiline
               rows={3}
             />
             <FormControlLabel
               control={
                 <Switch
-                  checked={form.status === "ativo"}
+                  checked={currentBranch.status === "ativo"}
                   onChange={(e) =>
-                    setForm({ ...form, status: e.target.checked ? "ativo" : "inativo" })
+                    setCurrentBranch({
+                      ...currentBranch,
+                      status: e.target.checked ? "ativo" : "inativo",
+                    })
                   }
                   sx={{
                     "& .MuiSwitch-switchBase.Mui-checked": {
@@ -119,7 +125,7 @@ const BranchFormDialog = ({
                   }}
                 />
               }
-              label={form.status === "ativo" ? "Ativa" : "Inativa"}
+              label={currentBranch.status === "ativo" ? "Ativa" : "Inativa"}
               sx={{ mb: 2, mr: 0, width: "100%" }}
             />
           </Box>
@@ -128,21 +134,12 @@ const BranchFormDialog = ({
             {isEditing ? (
               <>
                 <Button
-                  startIcon={<SaveIcon />}
-                  variant="contained"
-                  onClick={handleUpdate}
-                  sx={{
-                    flex: 1,
-                    bgcolor: PRIMARY_COLOR,
-                    "&:hover": { bgcolor: DARK_PRIMARY },
-                  }}
-                >
-                  Salvar
-                </Button>
-                <Button
                   startIcon={<CancelIcon />}
                   variant="outlined"
-                  onClick={resetForm}
+                  onClick={() => {
+                    onClose();
+                    resetForm();
+                  }}
                   sx={{
                     flex: 1,
                     borderColor: SECONDARY_COLOR,
@@ -150,6 +147,21 @@ const BranchFormDialog = ({
                   }}
                 >
                   Cancelar
+                </Button>
+                <Button
+                  startIcon={<SaveIcon />}
+                  variant="contained"
+                  onClick={() => {
+                    handleUpdate();
+                    resetForm();
+                  }}
+                  sx={{
+                    flex: 1,
+                    bgcolor: PRIMARY_COLOR,
+                    "&:hover": { bgcolor: DARK_PRIMARY },
+                  }}
+                >
+                  Salvar
                 </Button>
               </>
             ) : (
