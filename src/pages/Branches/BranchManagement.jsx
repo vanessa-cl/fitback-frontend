@@ -21,6 +21,7 @@ import { usePageTitle } from "../../context/PageTitleContext";
 import BranchConsultList from "./BranchConsultList";
 import filialService from "../../services/filialService";
 import BranchFormDialog from "./BranchFormDialog";
+import BranchDeleteDialog from "./BranchDeleteDialog";
 
 const INITIAL_FORM_STATE = {
   nome: "",
@@ -33,7 +34,7 @@ const BranchManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentBranch, setCurrentBranch] = useState(INITIAL_FORM_STATE);
   const [deleteBranch, setDeleteBranch] = useState(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -83,12 +84,6 @@ const BranchManagement = () => {
     setIsEditing(false);
   };
 
-  const validate = () => {
-    if (!form.name.trim()) return "Nome da filial é obrigatório.";
-    if (!form.address.trim()) return "Endereço é obrigatório.";
-    return null;
-  };
-
   const handleAddBranch = async () => {
     setLoading(true);
     await filialService
@@ -133,18 +128,28 @@ const BranchManagement = () => {
     setOpenBranchForm(true);
   };
 
-  const handleDeleteClick = (branch) => {
+  const handleDeleteBranch = (branch) => {
     setDeleteBranch(branch);
-    setDeleteDialogOpen(true);
+    setOpenDeleteDialog(true);
   };
 
-  const handleDeleteConfirm = () => {
-    if (!deleteBranch) return;
-    const updated = branches.filter((b) => b.id !== deleteBranch.id);
-    persist(updated);
-    setDeleteDialogOpen(false);
-    setDeleteBranch(null);
-    showSnackbar("Filial removida.", "info");
+  const handleDeleteConfirm = async () => {
+    setLoading(true);
+    await filialService
+      .deleteFilial(deleteBranch.id_filial)
+      .then(() => {
+        fetchBranches();
+        showSnackbar("Filial excluída com sucesso!", "success");
+        setOpenDeleteDialog(false);
+        setDeleteBranch(null);
+      })
+      .catch((err) => {
+        console.error("Erro ao excluir filial:", err);
+        showSnackbar("Erro ao excluir filial.", "error");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const showSnackbar = (message, severity = "success") => {
@@ -197,6 +202,7 @@ const BranchManagement = () => {
         setQuery={setQuery}
         filtered={filtered}
         handleEdit={handleEditBranch}
+        handleDelete={handleDeleteBranch}
       />
       {/* Modal de Formulário de Filial */}
       {openBranchForm ? (
@@ -217,38 +223,13 @@ const BranchManagement = () => {
         <></>
       )}
 
-      {/* Delete Confirmation */}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
-        <DialogTitle>Excluir Filial</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Tem certeza que deseja excluir a filial "{deleteBranch?.name}"? Essa
-            ação não pode ser desfeita.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setDeleteDialogOpen(false)}
-            startIcon={<CancelIcon />}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleDeleteConfirm}
-            startIcon={<DeleteIcon />}
-            sx={{
-              bgcolor: PRIMARY_COLOR,
-              color: "white",
-              "&:hover": { bgcolor: DARK_PRIMARY },
-            }}
-          >
-            Excluir
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Modal de Exclusão de Filial */}
+      <BranchDeleteDialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        onConfirm={handleDeleteConfirm}
+        branch={deleteBranch}
+      />
 
       <Snackbar
         open={snackbar.open}
