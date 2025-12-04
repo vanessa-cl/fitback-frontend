@@ -7,6 +7,8 @@ import perguntaService from "../../services/perguntaService";
 import QuestionFormDialog from "./QuestionFormDialog";
 import QuestionConsultList from "./QuestionConsultList";
 import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
+import questionarioService from "../../services/questionarioService";
+import { SearchOff } from "@mui/icons-material";
 
 const INITIAL_QUESTION_STATE = {
   id_categoria: "",
@@ -34,6 +36,8 @@ const QuestionManagement = () => {
   const [categories, setCategories] = useState([]);
   const { setTitle } = usePageTitle();
   const [loading, setLoading] = useState(false);
+  const [searchName, setSearchName] = useState("");
+  const [searchType, setSearchType] = useState("Todas");
 
   useEffect(() => {
     setTitle("Gerenciador de Perguntas");
@@ -72,15 +76,14 @@ const QuestionManagement = () => {
     fetchQuestions();
   }, []);
 
-  const fetchQuestionsByCategory = (categoryId) => {
-    perguntaService
-      .searchPerguntasPorCategoria(categoryId)
+  const fetchQuestionsByFilters = async (filters) => {
+    await questionarioService
+      .getPerguntasPorFiltros(filters)
       .then((res) => {
-        console.log(res.data);
         setQuestions(res.data);
       })
       .catch((err) => {
-        console.error("Erro ao carregar perguntas por categoria:", err);
+        console.error("Erro ao carregar perguntas por filtros:", err);
       });
   };
 
@@ -88,9 +91,13 @@ const QuestionManagement = () => {
     if (currentTab === 0) {
       fetchQuestions();
     } else {
-      fetchQuestionsByCategory(currentTab);
+      fetchQuestionsByFilters({ categoria: currentTab, tipo: searchType });
     }
-  }, [currentTab]);
+  }, [currentTab, searchType]);
+
+  useEffect(() => {
+    fetchQuestionsByFilters({ termo: searchName, tipo: searchType });
+  }, [searchName, searchType]);
 
   const handleAddQuestion = async () => {
     setLoading(true);
@@ -225,19 +232,19 @@ const QuestionManagement = () => {
           onUpdate={handleUpdateQuestion}
         />
         {/*  Consulta de Perguntas */}
-        {questions.length > 0 ? (
-          <QuestionConsultList
-            questions={questions}
-            setCurrentQuestion={setCurrentQuestion}
-            currentTab={currentTab}
-            setCurrentTab={setCurrentTab}
-            categories={categories}
-            onEdit={handleEditQuestion}
-            onDelete={handleDeleteConfirm}
-          />
-        ) : (
-          <LoadingSpinner />
-        )}
+        <QuestionConsultList
+          questions={questions}
+          setCurrentQuestion={setCurrentQuestion}
+          currentTab={currentTab}
+          setCurrentTab={setCurrentTab}
+          categories={categories}
+          onEdit={handleEditQuestion}
+          onDelete={handleDeleteConfirm}
+          searchName={searchName}
+          setSearchName={setSearchName}
+          searchType={searchType}
+          setSearchType={setSearchType}
+        />
       </Box>
 
       {/* Snackbar for notifications */}

@@ -9,6 +9,12 @@ import {
   Card,
   CardContent,
   IconButton,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  TextField,
+  Grid,
 } from "@mui/material";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import ViewIcon from "@mui/icons-material/Visibility";
@@ -18,6 +24,7 @@ import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../utils/colors";
 import { useState } from "react";
 import QuestionDetailsDialog from "./QuestionDetailsDialog";
 import QuestionDeleteDialog from "./QuestionDeleteDialog";
+import { SearchOff } from "@mui/icons-material";
 
 const QuestionConsultList = ({
   questions,
@@ -27,6 +34,10 @@ const QuestionConsultList = ({
   categories,
   onEdit,
   onDelete,
+  searchName,
+  setSearchName,
+  searchType,
+  setSearchType,
 }) => {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
@@ -51,6 +62,10 @@ const QuestionConsultList = ({
             borderColor: "divider",
             mb: 3,
             width: "100%",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 2,
           }}
         >
           <Tabs
@@ -71,6 +86,53 @@ const QuestionConsultList = ({
               />
             ))}
           </Tabs>
+          <Box
+            sx={{
+              width: "32%",
+              display: "flex",
+              gap: 2,
+              justifyContent: "flex-end",
+            }}
+          >
+            <Grid container spacing={2}>
+              <Box
+                sx={{
+                  width: "100%",
+                  mb: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <TextField
+                  label="Buscar por conteúdo"
+                  value={searchName}
+                  onChange={(e) => {
+                    setSearchName(e.target.value);
+                  }}
+                  sx={{ width: "55%" }}
+                  fullWidth
+                />
+                <FormControl fullWidth sx={{ width: "40%" }}>
+                  <InputLabel>Tipo de Pergunta</InputLabel>
+                  <Select
+                    value={searchType}
+                    label="Tipo de Pergunta"
+                    onChange={(e) => {
+                      setSearchType(e.target.value);
+                    }}
+                  >
+                    <MenuItem value="Todas">Todas</MenuItem>
+                    <MenuItem value="aberta">Aberta</MenuItem>
+                    <MenuItem value="multipla_escolha">
+                      Múltipla Escolha
+                    </MenuItem>
+                    <MenuItem value="escala">Escala</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Grid>
+          </Box>
         </Box>
 
         <Box
@@ -101,15 +163,14 @@ const QuestionConsultList = ({
         <Divider sx={{ mb: 3 }} />
 
         {questions.length === 0 ? (
-          <Box sx={{ textAlign: "center", py: 8 }}>
-            <FitnessCenterIcon sx={{ fontSize: 64, color: "#ccc", mb: 2 }} />
+          <Box sx={{ textAlign: "center", py: 6 }}>
+            <SearchOff sx={{ fontSize: 56, color: "#ccc" }} />
             <Typography variant="h6" color="textSecondary">
-              Sem resultados
+              Nenhuma pergunta encontrada
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              {currentTab === 0
-                ? "Comece adicionando sua primeira pergunta!"
-                : `Nenhuma pergunta da categoria selecionada encontrada.`}
+              Clique em + Nova Pergunta e adicione sua primeira pergunta no
+              formulário.
             </Typography>
           </Box>
         ) : (
@@ -129,16 +190,36 @@ const QuestionConsultList = ({
                         mb: 1,
                       }}
                     >
-                      <Typography
-                        variant="h6"
+                      <Box
                         sx={{
-                          fontSize: "1rem",
-                          flex: 1,
-                          color: SECONDARY_COLOR,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-start", 
+                          gap: 1,
+                          width: "100%",
                         }}
                       >
-                        {question.conteudo}
-                      </Typography>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontSize: "1rem",
+                            flex: 1,
+                            color: SECONDARY_COLOR,
+                          }}
+                        >
+                          {question.conteudo}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: "0.8rem",
+                            flex: 1,
+                            color: PRIMARY_COLOR,
+                          }}
+                        >
+                          {question.categoria}
+                        </Typography>
+                      </Box>
                       <Box sx={{ display: "flex", gap: 0.5 }}>
                         <IconButton
                           size="small"

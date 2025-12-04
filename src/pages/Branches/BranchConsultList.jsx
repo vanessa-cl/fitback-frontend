@@ -82,7 +82,8 @@ const BranchConsultList = ({
               Nenhuma filial encontrada
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Adicione sua primeira filial no formulário ao lado.
+              Clique em + Nova Filial e adicione sua primeira filial no
+              formulário.
             </Typography>
           </Box>
         ) : (

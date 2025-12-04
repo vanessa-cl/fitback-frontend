@@ -179,7 +179,7 @@ const BranchManagement = () => {
           onClick={() => setOpenBranchForm(true)}
         >
           <AddIcon />
-          Adicionar Filial
+          Nova Filial
         </Button>
       </Box>
       <BranchConsultList

@@ -37,7 +37,7 @@ import {
   QuestionAnswer,
   Warning as WarningIcon,
 } from "@mui/icons-material";
-
+import SearchOffIcon from "@mui/icons-material/SearchOff";
 import { usePageTitle } from "../../../context/PageTitleContext.jsx";
 import questionarioService from "../../../services/questionarioService.js";
 
@@ -423,96 +423,109 @@ const QuestionnaireList = () => {
           </Box>
         </Grid>
       </Box>
-      <Paper elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <strong>Código</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Título</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Descrição</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Criado em</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Status</strong>
-                </TableCell>
-                <TableCell align="center">
-                  <strong>Ações</strong>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {questionnaires.map((q) => (
-                <TableRow key={q.id_modelo} hover>
-                  <TableCell>{q.id_modelo}</TableCell>
-                  <TableCell>{q.nome}</TableCell>
-                  <TableCell>{q.descricao}</TableCell>
+      {questionnaires.length === 0 ? (
+        <Box sx={{ textAlign: "center", py: 6 }}>
+          <SearchOffIcon sx={{ fontSize: 56, color: "#ccc" }} />
+          <Typography variant="h6" color="textSecondary">
+            Nenhum questionário encontrado.
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            Clique em + Novo Questionário e adicione seu primeiro questionário
+            no formulário.
+          </Typography>
+        </Box>
+      ) : (
+        <Paper elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
                   <TableCell>
-                    {new Date(q.data_criacao).toLocaleDateString("pt-BR")}
+                    <strong>Código</strong>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={q.status_questionario}
-                      size="small"
-                      sx={{
-                        backgroundColor:
-                          q.status_questionario === "ativo"
-                            ? "#E8F5E9"
-                            : "#F5F5F5",
-                        color:
-                          q.status_questionario === "ativo"
-                            ? "#2E7D32"
-                            : "#757575",
-                        borderRadius: "6px",
-                        fontWeight: 500,
-                      }}
-                    />
+                    <strong>Título</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Descrição</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Criado em</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Status</strong>
                   </TableCell>
                   <TableCell align="center">
-                    <Box sx={{ display: "flex", justifyContent: "center" }}>
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() => handleEdit(q)}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDeleteClick(q)}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Box>
+                    <strong>Ações</strong>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Divider />
-        <TablePagination
-          component="div"
-          count={questionnaires.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[5, 10, 25]}
-          labelRowsPerPage="Rows per page:"
-          labelDisplayedRows={({ from, to, count }) =>
-            `${from}-${to} de ${count}`
-          }
-        />
-      </Paper>
+              </TableHead>
+              <TableBody>
+                {questionnaires.map((q) => (
+                  <TableRow key={q.id_modelo} hover>
+                    <TableCell>{q.id_modelo}</TableCell>
+                    <TableCell>{q.nome}</TableCell>
+                    <TableCell>{q.descricao}</TableCell>
+                    <TableCell>
+                      {new Date(q.data_criacao).toLocaleDateString("pt-BR")}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={q.status_questionario}
+                        size="small"
+                        sx={{
+                          backgroundColor:
+                            q.status_questionario === "ativo"
+                              ? "#E8F5E9"
+                              : "#F5F5F5",
+                          color:
+                            q.status_questionario === "ativo"
+                              ? "#2E7D32"
+                              : "#757575",
+                          borderRadius: "6px",
+                          fontWeight: 500,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box sx={{ display: "flex", justifyContent: "center" }}>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleEdit(q)}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDeleteClick(q)}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Divider />
+          <TablePagination
+            component="div"
+            count={questionnaires.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 25]}
+            labelRowsPerPage="Rows per page:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} de ${count}`
+            }
+          />
+        </Paper>
+      )}
     </Box>
   );
 };

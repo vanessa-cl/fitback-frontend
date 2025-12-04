@@ -10,6 +10,7 @@ class QuestionarioService extends ApiService {
   }
 
   getPerguntasPorFiltros({ termo = "", categoria = "Todas", tipo = "Todas" } = {}) {
+    console.log("Filtros recebidos:", { termo, categoria, tipo });
     const params = new URLSearchParams();
     if (tipo !== "Todas") {
       params.append("tipo", tipo);
@@ -21,6 +22,7 @@ class QuestionarioService extends ApiService {
       params.append("termo", termo.trim());
     }
     const query = params.toString() ? `?${params.toString()}` : "";
+    console.log("Query string construída:", query);
     return this.get(`/perguntas/buscar${query}`);
   }
 
