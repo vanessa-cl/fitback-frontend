@@ -82,7 +82,7 @@ const BranchManagement = () => {
   const handleAddBranch = async () => {
     setLoading(true);
     await filialService
-      .createFilial(form)
+      .createFilial(currentBranch)
       .then((res) => {
         fetchBranches();
         showSnackbar("Filial adicionada com sucesso!", "success");
