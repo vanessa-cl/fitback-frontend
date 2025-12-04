@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useNavigate } from "react-router";
 import {
   Box,
@@ -25,6 +25,7 @@ import {
   DialogContent,
   DialogActions,
   Alert,
+  Snackbar,
 } from "@mui/material";
 import {
   Add,
@@ -138,34 +139,6 @@ const ModalDeleteQuestionnaire = ({
   );
 };
 
-// Dados mockados baseados na imagem
-const mockQuestionnaires = [
-  {
-    id: 1,
-    codigo: "1",
-    categoria: "Funcionários",
-    descricao: "Avaliar a satisfação geral dos clientes",
-    dataCriacao: "2025-10-24",
-    status: "Ativo",
-  },
-  {
-    id: 3,
-    codigo: "3",
-    categoria: "Aulas",
-    descricao: "Avaliar a satisfação geral dos clientes",
-    dataCriacao: "2025-10-24",
-    status: "Inativo",
-  },
-  {
-    id: 4,
-    codigo: "4",
-    categoria: "Geral",
-    descricao: "Avaliar a satisfação geral dos clientes",
-    dataCriacao: "2025-10-24",
-    status: "Ativo",
-  },
-];
-
 const QuestionnaireList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -175,6 +148,11 @@ const QuestionnaireList = () => {
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState(null);
   const { setTitle } = usePageTitle();
   const navigate = useNavigate();
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -183,12 +161,11 @@ const QuestionnaireList = () => {
   const consultQuestionnaires = async () => {
     await questionarioService
       .getAllQuestionarios()
-      .then((response) => {
-        console.log(response.data);
-        setQuestionnaires(response.data);
+      .then((res) => {
+        setQuestionnaires(res.data);
       })
-      .catch((error) => {
-        console.error("Erro ao buscar questionários:", error);
+      .catch((err) => {
+        console.error("Erro ao buscar questionários:", err);
       });
   };
 
@@ -222,10 +199,18 @@ const QuestionnaireList = () => {
 
   const handleDeleteConfirm = () => {
     if (selectedQuestionnaire) {
-      setQuestionnaires((prev) =>
-        prev.filter((q) => q.id !== selectedQuestionnaire.id)
-      );
-      setSelectedQuestionnaire(null);
+      questionarioService
+        .deleteModelo(selectedQuestionnaire.id_modelo)
+        .then(() => {
+          consultQuestionnaires();
+          setSelectedQuestionnaire(null);
+          setDeleteModalOpen(false);
+          showSnackbar("Questionário deletado com sucesso.", "success");
+        })
+        .catch((err) => {
+          console.error("Erro ao deletar questionário:", err);
+          showSnackbar("Erro ao deletar questionário.", "error");
+        });
     }
   };
 
@@ -254,6 +239,30 @@ const QuestionnaireList = () => {
   //   page * rowsPerPage,
   //   page * rowsPerPage + rowsPerPage
   // );
+  const fetchFilteredQuestionnaires = async () => {
+    if (searchTerm.trim() === "") {
+      consultQuestionnaires();
+    } else {
+      await questionarioService
+        .getModelosByQuery(searchTerm)
+        .then((res) => {
+          setQuestionnaires(res.data);
+        })
+        .catch((err) => {
+          console.error("Erro ao buscar questionários:", err);
+        });
+    }
+  };
+
+  useEffect(() => {
+    fetchFilteredQuestionnaires();
+  }, [searchTerm]);
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   const totalQuestionnaires = questionnaires.length;
   const activeQuestionnaires = questionnaires.filter(
@@ -275,13 +284,27 @@ const QuestionnaireList = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
       <ModalDeleteQuestionnaire
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         itemName={
           selectedQuestionnaire
-            ? `Questionário ${selectedQuestionnaire.codigo} - ${selectedQuestionnaire.descricao}`
+            ? `Questionário ${selectedQuestionnaire.id_modelo} - ${selectedQuestionnaire.nome}`
             : ""
         }
       />
@@ -297,57 +320,61 @@ const QuestionnaireList = () => {
         </Typography>
       </Box>
       <Divider sx={{ mb: 3 }} />
-      <Grid container spacing={3} sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3 }}>
         <Grid item xs={12} lg={9}>
-          <Grid container spacing={2}>
-            {metricCards.map((metric) => (
-              <Grid item xs={12} sm={4} key={metric.title}>
-                <Card
-                  sx={{
-                    borderRadius: 2,
-                    boxShadow: 1,
-                    py: 1,
-                  }}
-                >
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        mb: 0.5,
-                      }}
-                    >
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ width: "42%", display: "flex", gap: 2 }}>
+              {metricCards.map((metric) => (
+                <Box key={metric.title}>
+                  <Card
+                    sx={{
+                      borderRadius: 2,
+                      boxShadow: 1,
+                      py: 1,
+                      minWidth: "200px",
+                      pb: 0,
+                    }}
+                  >
+                    <CardContent>
                       <Box
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          mr: 2,
+                          justifyContent: "space-between",
+                          mb: 0.5,
                         }}
                       >
-                        <metric.icon
+                        <Box
                           sx={{
-                            fontSize: 28,
-                            color: "#B25E09",
-                            mr: 1,
+                            display: "flex",
+                            alignItems: "center",
+                            mr: 2,
                           }}
-                        />
-                        <Typography variant="h5" fontWeight={700}>
-                          {metric.value}
+                        >
+                          <metric.icon
+                            sx={{
+                              fontSize: 28,
+                              color: "#B25E09",
+                              mr: 1,
+                            }}
+                          />
+                          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                            {metric.value}
+                          </Typography>
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ ml: "auto", fontWeight: 500 }}
+                        >
+                          {metric.title}
                         </Typography>
                       </Box>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ ml: "auto" }}
-                      >
-                        {metric.title}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+                    </CardContent>
+                  </Card>
+                </Box>
+              ))}
+            </Box>
             <Box
               component="form"
               onSubmit={handleSearchSubmit}
@@ -356,15 +383,16 @@ const QuestionnaireList = () => {
                 justifyContent: { xs: "space-between", lg: "flex-end" },
                 alignItems: "center",
                 mb: { xs: 2, lg: 1 },
-                gap: 1,
+                gap: 2,
+                width: "78%",
               }}
             >
               <TextField
-                placeholder="Título, descrição ou id..."
+                placeholder="Busque por título, descrição ou id..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 variant="outlined"
-                size="small"
+                size="medium"
                 fullWidth
                 InputProps={{
                   startAdornment: (
@@ -373,6 +401,7 @@ const QuestionnaireList = () => {
                     </InputAdornment>
                   ),
                 }}
+                sx={{ width: "78%" }}
               />
               <Button
                 variant="contained"
@@ -382,6 +411,8 @@ const QuestionnaireList = () => {
                   backgroundColor: "#B25E09",
                   textTransform: "none",
                   borderRadius: "8px",
+                  minWidth: "220px",
+                  maxWidth: "250px",
                   "&:hover": { backgroundColor: "#914d07" },
                 }}
                 startIcon={<Add fontSize="small" />}
@@ -389,9 +420,9 @@ const QuestionnaireList = () => {
                 Novo Questionário
               </Button>
             </Box>
-          </Grid>
+          </Box>
         </Grid>
-      </Grid>
+      </Box>
       <Paper elevation={0} sx={{ border: "1px solid #e0e0e0" }}>
         <TableContainer>
           <Table>
@@ -428,32 +459,39 @@ const QuestionnaireList = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={q.status}
+                      label={q.status_questionario}
                       size="small"
                       sx={{
                         backgroundColor:
-                          q.status === "Ativo" ? "#E8F5E9" : "#F5F5F5",
-                        color: q.status === "Ativo" ? "#2E7D32" : "#757575",
+                          q.status_questionario === "ativo"
+                            ? "#E8F5E9"
+                            : "#F5F5F5",
+                        color:
+                          q.status_questionario === "ativo"
+                            ? "#2E7D32"
+                            : "#757575",
                         borderRadius: "6px",
                         fontWeight: 500,
                       }}
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={() => handleEdit(q)}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => handleDeleteClick(q)}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleEdit(q)}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDeleteClick(q)}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}

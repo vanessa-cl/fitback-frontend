@@ -29,16 +29,33 @@ import {
 import questionarioService from "../../../services/questionarioService";
 import { styles } from "./RegisterQuestionnaire.styles";
 
+const questionTypeLabel = {
+  aberta: "Aberta",
+  multipla_escolha: "Múltipla Escolha",
+  escala: "Escala",
+};
+
+const getQuestionOptionsText = (pergunta) => {
+  if (pergunta.tipo === "multipla_escolha" && pergunta.opcoes) {
+    return pergunta.opcoes.map((option) => option.texto).join(", ");
+  }
+  return "N/A";
+};
+
+const INITIAL_FORM_STATE = {
+  titulo: "",
+  descricao: "",
+  perguntasIds: [],
+};
+
 const RegisterQuestionnaire = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const editModelId = id;
   const { setTitle } = usePageTitle();
+  const [form, setForm] = useState(INITIAL_FORM_STATE);
 
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
   const [perguntasFiltradas, setPerguntasFiltradas] = useState([]);
-  const [perguntasSelecionadas, setPerguntasSelecionadas] = useState([]);
 
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
@@ -65,7 +82,6 @@ const RegisterQuestionnaire = () => {
     let mounted = true;
 
     (async () => {
-      // carregar categorias
       try {
         const resCat = await questionarioService.getCategorias();
         if (mounted) setCategorias(resCat.data || []);
@@ -116,52 +132,54 @@ const RegisterQuestionnaire = () => {
     };
   }, [editModelId]);
 
-  // carrega perguntas com filtros (se nenhum parâmetro for passado, usa os estados atuais)
   const aplicarFiltros = async ({
-    search = filtroNome,
+    termo = filtroNome,
     categoria = filtroCategoria,
     tipo = filtroTipo,
   } = {}) => {
-    try {
-      const res = await questionarioService.getPerguntas({
-        search,
+    console.log("Aplicando filtros:", { termo, categoria, tipo });
+    await questionarioService
+      .getPerguntasPorFiltros({
+        termo,
         categoria,
         tipo,
-      });
-      setPerguntasFiltradas(res.data || []);
-    } catch {
-      setPerguntasFiltradas([]);
-    }
+      })
+      .then((res) => {
+        console.log(res);
+        setPerguntasFiltradas(res.data);
+      })
+      .catch(() => setPerguntasFiltradas([]));
   };
 
   const togglePergunta = (pergunta) => {
-    const jaExiste = perguntasSelecionadas.find(
-      (p) => p.id === pergunta.id_pergunta
-    );
+    const jaExiste = form.perguntas.find((p) => p.id === pergunta.id_pergunta);
     if (jaExiste) {
-      setPerguntasSelecionadas((prev) =>
-        prev.filter((p) => p.id !== pergunta.id_pergunta)
-      );
-    } else {
-      setPerguntasSelecionadas((prev) => [
+      setForm((prev) => ({
         ...prev,
-        {
-          id: pergunta.id_pergunta,
-          conteudo: pergunta.conteudo,
-          tipo: pergunta.tipo,
-          categoria: pergunta.categoria,
-        },
-      ]);
+        perguntas: prev.perguntas.filter((p) => p.id !== pergunta.id_pergunta),
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        perguntas: [
+          ...prev.perguntas,
+          {
+            id: pergunta.id_pergunta,
+            conteudo: pergunta.conteudo,
+            tipo: pergunta.tipo,
+            categoria: pergunta.categoria,
+          },
+        ],
+      }));
     }
   };
 
-  //----------------------------------------------------------------------------------------- botão próxima etapa
   const handleNext = async () => {
-    if (!titulo.trim()) {
+    if (!form.titulo.trim()) {
       alert("Por favor, insira um título para o questionário");
       return;
     }
-    if (perguntasSelecionadas.length === 0) {
+    if (form.perguntasIds.length === 0) {
       alert("Por favor, selecione pelo menos uma pergunta");
       return;
     }
@@ -169,13 +187,10 @@ const RegisterQuestionnaire = () => {
     try {
       let id_modelo = editModelId;
       if (!editModelId) {
-        const payload = { nome: titulo, descricao };
+        const payload = { nome: form.titulo, descricao: form.descricao };
         const res = await questionarioService.createModelo(payload);
-        console.log("Resposta createModelo:", res);
 
-        // extrair id
         id_modelo = res?.data?.id ?? res?.data?.insertId ?? res?.data ?? null;
-        // se a API retornar apenas o objeto criado sem id, tentar inspecionar status/data
         if (
           !id_modelo &&
           res &&
@@ -197,8 +212,8 @@ const RegisterQuestionnaire = () => {
       } else {
         // atualizar nome/descricao
         await questionarioService.updateModelo(editModelId, {
-          nome: titulo,
-          descricao,
+          nome: form.titulo,
+          descricao: form.descricao,
         });
       }
 
@@ -209,7 +224,7 @@ const RegisterQuestionnaire = () => {
           : String(id_modelo);
       console.log("Navegando para ordenar-questionario com id:", id_modelo);
       navigate(`/ordenar-questionario/${id_modelo}`, {
-        state: { perguntas: perguntasSelecionadas },
+        state: { perguntas: form.perguntasIds },
       });
     } catch (err) {
       // console.error("Erro em handleNext:", err);
@@ -219,12 +234,10 @@ const RegisterQuestionnaire = () => {
       //   "Erro ao criar/atualizar o modelo";
       // alert(msg);
       navigate(`/ordenar-questionario/${10}`, {
-        state: { perguntas: perguntasSelecionadas },
+        state: { perguntas: form.perguntasIds },
       });
     }
   };
-
-  //-----------------------------------------------------------------------------------------
 
   return (
     <Box sx={styles.container}>
@@ -235,16 +248,20 @@ const RegisterQuestionnaire = () => {
       <Box sx={styles.formSection}>
         <TextField
           label="Título"
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
+          value={form.titulo}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, titulo: e.target.value }))
+          }
           fullWidth
           required
           sx={{ mb: 2 }}
         />
         <TextField
           label="Descrição"
-          value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
+          value={form.descricao}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, descricao: e.target.value }))
+          }
           multiline
           rows={3}
           fullWidth
@@ -254,22 +271,28 @@ const RegisterQuestionnaire = () => {
       <Typography variant="h6" sx={styles.sectionTitle}>
         2 - Selecione as perguntas que farão parte do questionário:
       </Typography>
-
       <Box sx={styles.filterSection}>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={4}>
+          <Box
+            sx={{
+              width: "100%",
+              mb: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
             <TextField
               label="Buscar por conteúdo"
               value={filtroNome}
               onChange={(e) => {
                 setFiltroNome(e.target.value);
-                aplicarFiltros({ search: e.target.value });
+                aplicarFiltros({ termo: e.target.value });
               }}
+              sx={{ width: "60%" }}
               fullWidth
             />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <FormControl fullWidth>
+            <FormControl fullWidth sx={{ width: "30%" }}>
               <InputLabel>Categoria</InputLabel>
               <Select
                 value={filtroCategoria}
@@ -281,15 +304,13 @@ const RegisterQuestionnaire = () => {
               >
                 <MenuItem value="Todas">Todas</MenuItem>
                 {categorias.map((cat) => (
-                  <MenuItem key={cat.id_categoria} value={cat.nome}>
+                  <MenuItem key={cat.id_categoria} value={cat.id_categoria}>
                     {cat.nome}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <FormControl fullWidth>
+            <FormControl fullWidth sx={{ width: "30%" }}>
               <InputLabel>Tipo de Pergunta</InputLabel>
               <Select
                 value={filtroTipo}
@@ -303,13 +324,12 @@ const RegisterQuestionnaire = () => {
                 <MenuItem value="aberta">Aberta</MenuItem>
                 <MenuItem value="multipla_escolha">Múltipla Escolha</MenuItem>
                 <MenuItem value="escala">Escala</MenuItem>
-                <MenuItem value="outro">Outro</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
+          </Box>
         </Grid>
       </Box>
-
+      {console.log(form)}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -329,14 +349,18 @@ const RegisterQuestionnaire = () => {
               <TableCell>
                 <strong>Tipo</strong>
               </TableCell>
+              <TableCell>
+                <strong>Opções</strong>
+              </TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
             {perguntasFiltradas
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((pergunta) => {
-                const selecionada = perguntasSelecionadas.some(
-                  (p) => p.id === pergunta.id_pergunta
+                const selecionada = form.perguntasIds.includes(
+                  pergunta.id_pergunta
                 );
                 return (
                   <TableRow
@@ -355,7 +379,8 @@ const RegisterQuestionnaire = () => {
                     <TableCell>{pergunta.id_pergunta}</TableCell>
                     <TableCell>{pergunta.conteudo}</TableCell>
                     <TableCell>{pergunta.categoria}</TableCell>
-                    <TableCell>{pergunta.tipo}</TableCell>
+                    <TableCell>{questionTypeLabel[pergunta.tipo]}</TableCell>
+                    <TableCell>{getQuestionOptionsText(pergunta)}</TableCell>
                   </TableRow>
                 );
               })}
