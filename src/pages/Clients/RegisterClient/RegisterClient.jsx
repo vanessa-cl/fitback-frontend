@@ -65,7 +65,7 @@ const RegisterClient = () => {
         }
         setSnackbar({
           open: true,
-          message: err.response.data.message || "Erro ao cadastrar cliente",
+          message: err.response.data.error || "Erro ao cadastrar cliente",
           severity: "error",
         });
       });
