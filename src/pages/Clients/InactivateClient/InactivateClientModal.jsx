@@ -3,12 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import WarningAmberTwoTone from "@mui/icons-material/WarningAmberTwoTone";
 import * as S from "./InactivateClient.styles.js";
 
-const InactivateClientModal = ({
-  open,
-  onClose,
-  client,
-  inactiveClient,
-}) => {
+const InactivateClientModal = ({ open, onClose, client, inactivateClient }) => {
   return (
     <Dialog open={open} onClose={onClose}>
       <S.DialogContent>
@@ -25,7 +20,7 @@ const InactivateClientModal = ({
         <Button
           variant="contained"
           onClick={() => {
-            inactiveClient(client, { status: "inativo" });
+            inactivateClient(client, { status: "inativo" });
             onClose();
           }}
         >

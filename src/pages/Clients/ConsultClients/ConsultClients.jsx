@@ -125,11 +125,10 @@ const ConsultClients = () => {
     setSearchTerm(e.target.value);
   };
 
-  const updateClient = async (client, newClientData) => {
+  const inactivateClient = async (client, newClientData) => {
     if (!client) return;
     await clienteService
       .updateCliente(client.id_cliente, {
-        ...client,
         data_desistencia: new Date().toISOString().split("T")[0],
         ...newClientData,
       })
@@ -142,7 +141,6 @@ const ConsultClients = () => {
         });
       })
       .catch((err) => {
-        console.log(err);
         setSnackbar({
           open: true,
           message: err.response.data.message || err.response.data.error,
@@ -360,7 +358,7 @@ const ConsultClients = () => {
         open={openInactivateModal}
         onClose={() => setOpenInactivateModal(false)}
         client={selectedClient}
-        inactiveClient={updateClient}
+        inactivateClient={inactivateClient}
       />
       <EditClientModal
         openEditModal={openEditModal}
@@ -368,7 +366,9 @@ const ConsultClients = () => {
         client={selectedClient}
         detailsMode={detailsMode}
         setDetailsMode={setDetailsMode}
-        updateClient={updateClient}
+        fetchClients={fetchClients}
+        setSelectedClient={setSelectedClient}
+        setSnackbar={setSnackbar}
       />
     </S.ConsultClientsContainer>
   );

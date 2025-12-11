@@ -1,11 +1,14 @@
-import { Button, TextField } from "@mui/material";
+import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import * as S from "../RegisterClient/RegisterClient.styles.js";
-import * as T from "./EditClientModal.styles.js"
+import * as T from "./EditClientModal.styles.js";
 import { DialogWrapper } from "./EditClientModal.styles.js";
 import CheckTwoTone from "@mui/icons-material/CheckTwoTone";
 import CancelTwoTone from "@mui/icons-material/CancelTwoTone";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import clienteService from "../../../services/clienteService.js";
+import ClearIcon from "@mui/icons-material/Clear";
+import { formatCPF, formatPhone } from "../../../utils/index.js";
 
 const INITIAL_FORM_STATE = {
   nome: "",
@@ -23,23 +26,59 @@ const EditClientModal = ({
   client,
   detailsMode,
   setDetailsMode,
-  updateClient,
+  fetchClients,
+  setSelectedClient,
+  setSnackbar,
 }) => {
   const [formClient, setFormClient] = useState(INITIAL_FORM_STATE);
+  const [helperText, setHelperText] = useState({});
 
   useEffect(() => {
     setFormClient({
       nome: client?.nome || "",
-      cpf: client?.cpf || "",
+      cpf: client?.cpf ? formatCPF(client.cpf) : "",
       matricula: client?.matricula || "",
       email: client?.email || "",
-      telefone: client?.telefone || "",
+      telefone: client?.telefone ? formatPhone(client.telefone) : "",
     });
   }, [client]);
+
+  const updateClient = async (client, newClientData) => {
+    if (!client) return;
+    await clienteService
+      .updateCliente(client.id_cliente, {
+        ...client,
+        ...newClientData,
+      })
+      .then(() => {
+        fetchClients();
+        setSnackbar({
+          open: true,
+          message: "Cliente atualizado com sucesso!",
+          severity: "success",
+        });
+        setTimeout(() => {
+          setOpenEditModal(false);
+          setSelectedClient(null);
+        }, 6000);
+      })
+      .catch((err) => {
+        if (err.response?.data?.validationErrors) {
+          return setHelperText(err.response?.data?.validationErrors);
+        }
+        setSnackbar({
+          open: true,
+          message: err.response.data.message || err.response.data.error,
+          severity: "error",
+        });
+      });
+  };
 
   return (
     <DialogWrapper open={openEditModal} onClose={() => setOpenEditModal(false)}>
       <h3>{detailsMode ? "Detalhes do Cliente" : "Editar Cliente"}</h3>
+      {console.log(helperText)}
+      {console.log(formClient)}
       <S.RegisterClientForm>
         <T.ClientDetailsForm>
           <TextField
@@ -50,24 +89,68 @@ const EditClientModal = ({
             onChange={(e) =>
               setFormClient({ ...formClient, nome: e.target.value })
             }
-            label="Nome*"
+            label="Nome"
             variant="outlined"
             margin="normal"
             readOnly={detailsMode}
             disabled={detailsMode}
+            required
+            error={!!helperText.nome}
+            helperText={helperText.nome}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, nome: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 3,
+                maxLength: 100,
+              },
+            }}
           />
           <TextField
             id="cpf-input"
             name="cpf-input"
             value={formClient.cpf}
             onChange={(e) =>
-              setFormClient({ ...formClient, cpf: e.target.value })
+              setFormClient({ ...formClient, cpf: formatCPF(e.target.value) })
             }
-            label="CPF*"
+            label="CPF"
             variant="outlined"
             margin="normal"
             readOnly={detailsMode}
             disabled={detailsMode}
+            error={!!helperText.cpf}
+            helperText={helperText.cpf}
+            required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, cpf: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 14,
+                maxLength: 14,
+              },
+            }}
           />
           <TextField
             id="registration-input"
@@ -76,11 +159,33 @@ const EditClientModal = ({
             onChange={(e) =>
               setFormClient({ ...formClient, matricula: e.target.value })
             }
-            label="Matrícula*"
+            label="Matrícula"
             variant="outlined"
             margin="normal"
             readOnly={detailsMode}
             disabled={detailsMode}
+            error={!!helperText.matricula}
+            helperText={helperText.matricula}
+            required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, matricula: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 3,
+                maxLength: 20,
+              },
+            }}
           />
           <TextField
             id="email-input"
@@ -89,24 +194,71 @@ const EditClientModal = ({
             onChange={(e) =>
               setFormClient({ ...formClient, email: e.target.value })
             }
-            label="Email*"
+            label="Email"
             variant="outlined"
             margin="normal"
             readOnly={detailsMode}
             disabled={detailsMode}
+            error={!!helperText.email}
+            helperText={helperText.email}
+            required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, email: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 5,
+                maxLength: 150,
+              },
+            }}
           />
           <TextField
             id="phone-input"
             name="phone-input"
             value={formClient.telefone}
             onChange={(e) =>
-              setFormClient({ ...formClient, telefone: e.target.value })
+              setFormClient({
+                ...formClient,
+                telefone: formatPhone(e.target.value),
+              })
             }
-            label="Telefone*"
+            label="Telefone"
             variant="outlined"
             margin="normal"
             readOnly={detailsMode}
             disabled={detailsMode}
+            error={!!helperText.telefone}
+            helperText={helperText.telefone}
+            required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, telefone: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 15,
+                maxLength: 15,
+              },
+            }}
           />
         </T.ClientDetailsForm>
         <S.ActionRow>
@@ -115,7 +267,6 @@ const EditClientModal = ({
             variant="outlined"
             color="secondary"
             onClick={() => {
-              setOpenEditModal(false);
               setDetailsMode(false);
             }}
           >
@@ -130,7 +281,6 @@ const EditClientModal = ({
               setDetailsMode(false);
               if (!detailsMode) {
                 updateClient(client, formClient);
-                setOpenEditModal(false);
               }
             }}
           >
