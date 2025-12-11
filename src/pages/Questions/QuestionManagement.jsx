@@ -47,7 +47,6 @@ const QuestionManagement = () => {
     categoriaService
       .getAllCategorias()
       .then((res) => {
-        console.log("Categorias carregadas:", res.data);
         setCategories(res.data);
       })
       .catch((err) => {
@@ -136,6 +135,9 @@ const QuestionManagement = () => {
         opcoes: currentQuestion.opcoes,
       })
       .then(() => {
+        setCurrentTab(0);
+        setSearchName("");
+        setSearchType("Todas");
         fetchQuestions();
         resetForm();
         showSnackbar("Pergunta atualizada com sucesso!", "success");
@@ -152,6 +154,9 @@ const QuestionManagement = () => {
     await perguntaService
       .deletePergunta(id_pergunta)
       .then(() => {
+        setCurrentTab(0);
+        setSearchName("");
+        setSearchType("Todas");
         fetchQuestions();
         showSnackbar("Pergunta excluída com sucesso!", "success");
       })

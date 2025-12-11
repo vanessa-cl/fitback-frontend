@@ -1,4 +1,5 @@
 import { ApiService } from "./apiService";
+import { unformatCPF, unformatPhone } from "../utils";
 
 class ClienteService extends ApiService {
   constructor() {
@@ -14,10 +15,11 @@ class ClienteService extends ApiService {
   }
 
   createCliente(clienteData) {
-    clienteData.senha_hash = clienteData.senha;
-    delete clienteData.senha;
-    delete clienteData.confirmarSenha;
-    return this.post("/", clienteData);
+    return this.post("/", {
+      ...clienteData,
+      cpf: unformatCPF(clienteData.cpf),
+      telefone: unformatPhone(clienteData.telefone),
+    });
   }
 
   updateCliente(id, clienteData) {

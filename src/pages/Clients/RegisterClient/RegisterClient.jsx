@@ -1,4 +1,4 @@
-import { Button, TextField } from "@mui/material";
+import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { usePageTitle } from "../../../context/PageTitleContext.jsx";
 import * as S from "./RegisterClient.styles.js";
@@ -8,6 +8,11 @@ import clienteService from "../../../services/clienteService.js";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useNavigate } from "react-router";
+import { formatCPF } from "../../../utils/formatters/formatCPF.js";
+import { formatPhone } from "../../../utils/formatters/formatPhone.js";
+import ClearIcon from "@mui/icons-material/Clear";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 const INITIAL_FORM_STATE = {
   nome: "",
@@ -28,23 +33,25 @@ const RegisterClient = () => {
     severity: "",
   });
   const navigate = useNavigate();
+  const [helperText, setHelperText] = useState({});
+  const [visibility, setVisibility] = useState({
+    password: false,
+    confirmPassword: false,
+  });
 
   useEffect(() => {
     setTitle("Cadastrar Cliente");
   }, [setTitle]);
 
-  const checkFormValidity = () => {
-    return (
-      Object.values(formClient).every((value) => value.trim() !== "") &&
-      formClient.senha === formClient.confirmarSenha
-    );
-  };
+  const handleClickShowPassword = (field) =>
+    setVisibility((prev) => ({ ...prev, [field]: !prev[field] }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setHelperText({});
     await clienteService
       .createCliente(formClient)
-      .then((response) => {
+      .then((res) => {
         setFormClient(INITIAL_FORM_STATE);
         setSnackbar({
           open: true,
@@ -52,10 +59,13 @@ const RegisterClient = () => {
           severity: "success",
         });
       })
-      .catch((error) => {
+      .catch((err) => {
+        if (err.response?.data?.validationErrors) {
+          return setHelperText(err.response?.data?.validationErrors);
+        }
         setSnackbar({
           open: true,
-          message: error.response.data.message || "Erro ao cadastrar cliente",
+          message: err.response.data.message || "Erro ao cadastrar cliente",
           severity: "error",
         });
       });
@@ -68,6 +78,7 @@ const RegisterClient = () => {
 
   return (
     <div>
+      {console.log(formClient)}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -96,18 +107,60 @@ const RegisterClient = () => {
             variant="outlined"
             margin="normal"
             required
+            error={!!helperText.nome}
+            helperText={helperText.nome}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, nome: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 3,
+                maxLength: 100,
+              },
+            }}
           />
           <TextField
             id="cpf-input"
             name="cpf-input"
             value={formClient.cpf}
             onChange={(e) =>
-              setFormClient({ ...formClient, cpf: e.target.value })
+              setFormClient({ ...formClient, cpf: formatCPF(e.target.value) })
             }
             label="CPF"
             variant="outlined"
             margin="normal"
+            error={!!helperText.cpf}
+            helperText={helperText.cpf}
             required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, cpf: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 14,
+                maxLength: 14,
+              },
+            }}
           />
           <TextField
             id="registration-input"
@@ -119,7 +172,28 @@ const RegisterClient = () => {
             label="Matrícula"
             variant="outlined"
             margin="normal"
+            error={!!helperText.matricula}
+            helperText={helperText.matricula}
             required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, matricula: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 3,
+                maxLength: 20,
+              },
+            }}
           />
           <TextField
             id="email-input"
@@ -131,24 +205,69 @@ const RegisterClient = () => {
             label="Email"
             variant="outlined"
             margin="normal"
+            error={!!helperText.email}
+            helperText={helperText.email}
             required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, email: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 5,
+                maxLength: 150,
+              },
+            }}
           />
           <TextField
             id="phone-input"
             name="phone-input"
             value={formClient.telefone}
             onChange={(e) =>
-              setFormClient({ ...formClient, telefone: e.target.value })
+              setFormClient({
+                ...formClient,
+                telefone: formatPhone(e.target.value),
+              })
             }
             label="Telefone"
             variant="outlined"
             margin="normal"
+            error={!!helperText.telefone}
+            helperText={helperText.telefone}
             required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setFormClient((prev) => ({ ...prev, telefone: "" }))
+                      }
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 15,
+                maxLength: 15,
+              },
+            }}
           />
           <TextField
             id="password-input"
             name="password-input"
-            type="password"
+            type={visibility.password ? "text" : "password"}
             value={formClient.senha}
             onChange={(e) =>
               setFormClient({ ...formClient, senha: e.target.value })
@@ -156,12 +275,31 @@ const RegisterClient = () => {
             label="Senha"
             variant="outlined"
             margin="normal"
+            error={!!helperText.senha}
+            helperText={helperText.senha}
             required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => handleClickShowPassword("password")}
+                    >
+                      {visibility.password ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 8,
+                maxLength: 50,
+              },
+            }}
           />
           <TextField
             id="confirm-password-input"
             name="confirm-password-input"
-            type="password"
+            type={visibility.confirmarSenha ? "text" : "password"}
             value={formClient.confirmarSenha}
             onChange={(e) =>
               setFormClient({ ...formClient, confirmarSenha: e.target.value })
@@ -169,7 +307,30 @@ const RegisterClient = () => {
             label="Repita a Senha"
             variant="outlined"
             margin="normal"
+            error={!!helperText.confirmarSenha}
+            helperText={helperText.confirmarSenha}
             required
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => handleClickShowPassword("confirmarSenha")}
+                    >
+                      {visibility.confirmarSenha ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                minLength: 8,
+                maxLength: 50,
+              },
+            }}
           />
         </S.FormGrid>
         <S.ActionRow>
@@ -185,7 +346,6 @@ const RegisterClient = () => {
             startIcon={<AddIcon />}
             variant="contained"
             color="primary"
-            disabled={!checkFormValidity()}
             type="submit"
             onClick={handleSubmit}
           >

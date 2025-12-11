@@ -292,7 +292,7 @@ const ConsultClients = () => {
           variant="filled"
           value={searchTerm}
           onChange={handleSearchChange}
-          placeholder="Buscar cliente por name ou CPF..."
+          placeholder="Buscar cliente por nome ou CPF..."
           slotProps={{
             input: {
               endAdornment: (

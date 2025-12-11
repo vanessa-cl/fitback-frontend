@@ -217,7 +217,7 @@ const QuestionConsultList = ({
                             color: PRIMARY_COLOR,
                           }}
                         >
-                          {question.categoria}
+                          {question.categoria || question.categoria_nome}
                         </Typography>
                       </Box>
                       <Box sx={{ display: "flex", gap: 0.5 }}>

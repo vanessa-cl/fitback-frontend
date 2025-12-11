@@ -4,8 +4,6 @@ import DefaultLayout from "../layouts/DefaultLayout.jsx";
 import Home from "../pages/home/Home.jsx";
 import RegisterClient from "../pages/Clients/RegisterClient/RegisterClient.jsx";
 import ConsultClients from "../pages/Clients/ConsultClients/ConsultClients.jsx";
-import ListCategories from "../pages/Categories/ListCategories.jsx";
-import RegisterCategory from "../pages/Categories/RegisterCategory.jsx";
 import Login from "../pages/Auth/Login.jsx";
 import QuestionManagement from "../pages/Questions/QuestionManagement.jsx";
 import QuestionnaireList from "../pages/Questionnaire/ConsultQuestionnaire/QuestionnaireList.jsx";
