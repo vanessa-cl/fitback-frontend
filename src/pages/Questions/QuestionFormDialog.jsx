@@ -10,6 +10,9 @@ import {
   Typography,
   Button,
   Dialog,
+  InputAdornment,
+  IconButton,
+  FormHelperText,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import SubjectIcon from "@mui/icons-material/Subject";
@@ -18,6 +21,7 @@ import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CloseIcon from "@mui/icons-material/Close";
+import ClearIcon from "@mui/icons-material/Clear";
 import QuestionsOptions from "./QuestionsOptions";
 import {
   PRIMARY_COLOR,
@@ -41,21 +45,8 @@ const QuestionFormDialog = ({
   resetForm,
   onAdd,
   onUpdate,
+  helperText,
 }) => {
-  const checkValidFields = () => {
-    const { tipo, opcoes, conteudo, id_categoria, obrigatoria } =
-      currentQuestion;
-
-    if (!conteudo || !id_categoria || !tipo) return false;
-
-    if (tipo === "multipla_escolha") {
-      if (!opcoes || opcoes.length < 2) return false;
-      return opcoes.every((o) => o.texto.trim() !== "");
-    }
-
-    return true;
-  };
-
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <Box sx={{ flex: "0 0 41.6667%", p: 4 }}>
@@ -113,12 +104,44 @@ const QuestionFormDialog = ({
               rows={3}
               placeholder="Ex: Como você avalia o estado dos equipamentos?"
               required
+              error={!!helperText.conteudo}
+              helperText={helperText.conteudo}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() =>
+                          setCurrentQuestion({
+                            ...currentQuestion,
+                            conteudo: "",
+                          })
+                        }
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+                htmlInput: {
+                  minLength: 3,
+                  maxLength: 255,
+                },
+              }}
             />
             <Box sx={{ display: "flex", gap: 2 }}>
-              <FormControl fullWidth>
-                <InputLabel htmlFor="category-select">Categoria</InputLabel>
+              <FormControl
+                fullWidth
+                error={!!helperText.id_categoria}
+                variant="outlined"
+              >
+                <InputLabel htmlFor="category-select-label">
+                  Categoria *
+                </InputLabel>
                 <Select
                   id="category-select"
+                  label="Categoria *"
+                  labelId="category-select-label"
                   value={currentQuestion.id_categoria}
                   onChange={(e) =>
                     setCurrentQuestion({
@@ -140,12 +163,21 @@ const QuestionFormDialog = ({
                     </MenuItem>
                   ))}
                 </Select>
+                {helperText.id_categoria && (
+                  <FormHelperText>{helperText.id_categoria}</FormHelperText>
+                )}
               </FormControl>
 
-              <FormControl fullWidth>
-                <InputLabel htmlFor="type-select">Tipo</InputLabel>
+              <FormControl
+                fullWidth
+                error={!!helperText.tipo}
+                variant="outlined"
+              >
+                <InputLabel htmlFor="type-select">Tipo *</InputLabel>
                 <Select
                   id="type-select"
+                  label="Tipo *"
+                  labelId="type-select-label"
                   value={currentQuestion.tipo}
                   onChange={(e) =>
                     setCurrentQuestion({
@@ -164,6 +196,9 @@ const QuestionFormDialog = ({
                     </MenuItem>
                   ))}
                 </Select>
+                {helperText.tipo && (
+                  <FormHelperText>{helperText.tipo}</FormHelperText>
+                )}
               </FormControl>
             </Box>
             <Box sx={{ display: "flex", gap: 2, p: 1 }}>
@@ -210,6 +245,7 @@ const QuestionFormDialog = ({
                 }
                 isEditing={isEditing}
                 initialOptions={currentQuestion.opcoes || []}
+                helperText={helperText}
               />
             ) : null}
           </Box>
@@ -238,7 +274,6 @@ const QuestionFormDialog = ({
                   startIcon={<SaveIcon />}
                   onClick={() => {
                     onUpdate();
-                    onClose();
                   }}
                   sx={{
                     flex: 1,
@@ -275,9 +310,7 @@ const QuestionFormDialog = ({
                   startIcon={<AddIcon />}
                   onClick={() => {
                     onAdd();
-                    onClose();
                   }}
-                  disabled={!checkValidFields()}
                   sx={{
                     py: 1.5,
                     bgcolor: PRIMARY_COLOR,

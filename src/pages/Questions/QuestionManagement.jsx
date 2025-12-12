@@ -38,6 +38,7 @@ const QuestionManagement = () => {
   const [loading, setLoading] = useState(false);
   const [searchName, setSearchName] = useState("");
   const [searchType, setSearchType] = useState("Todas");
+  const [helperText, setHelperText] = useState({});
 
   useEffect(() => {
     setTitle("Gerenciador de Perguntas");
@@ -100,6 +101,7 @@ const QuestionManagement = () => {
 
   const handleAddQuestion = async () => {
     setLoading(true);
+    setHelperText({});
     await perguntaService
       .createPergunta({
         id_categoria: currentQuestion.id_categoria,
@@ -111,13 +113,21 @@ const QuestionManagement = () => {
         opcoes: currentQuestion.opcoes,
       })
       .then(() => {
-        fetchQuestions();
-        resetForm();
         showSnackbar("Pergunta adicionada com sucesso!", "success");
+        resetForm();
+        setTimeout(() => {
+          fetchQuestions();
+          setOpenQuestionForm(false);
+        }, 6000);
       })
       .catch((err) => {
-        console.error("Erro ao adicionar pergunta:", err);
-        showSnackbar("Erro ao adicionar pergunta", "error");
+        if (err.response?.data?.validationErrors) {
+          return setHelperText(err.response?.data?.validationErrors);
+        }
+        showSnackbar(
+          err.response?.data?.error || "Erro ao adicionar pergunta",
+          "error"
+        );
       })
       .finally(() => setLoading(false));
   };
@@ -135,16 +145,21 @@ const QuestionManagement = () => {
         opcoes: currentQuestion.opcoes,
       })
       .then(() => {
-        setCurrentTab(0);
-        setSearchName("");
-        setSearchType("Todas");
-        fetchQuestions();
-        resetForm();
         showSnackbar("Pergunta atualizada com sucesso!", "success");
+        setTimeout(() => {
+          resetForm();
+          fetchQuestions();
+          setOpenQuestionForm(false);
+        }, 6000);
       })
       .catch((err) => {
-        console.error("Erro ao atualizar pergunta:", err);
-        showSnackbar("Erro ao atualizar pergunta", "error");
+        if (err.response?.data?.validationErrors) {
+          return setHelperText(err.response?.data?.validationErrors);
+        }
+        showSnackbar(
+          err.response?.data?.error || "Erro ao atualizar pergunta",
+          "error"
+        );
       })
       .finally(() => setLoading(false));
   };
@@ -235,6 +250,7 @@ const QuestionManagement = () => {
           resetForm={resetForm}
           onAdd={handleAddQuestion}
           onUpdate={handleUpdateQuestion}
+          helperText={helperText}
         />
         {/*  Consulta de Perguntas */}
         <QuestionConsultList
@@ -257,7 +273,7 @@ const QuestionManagement = () => {
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={handleCloseSnackbar}

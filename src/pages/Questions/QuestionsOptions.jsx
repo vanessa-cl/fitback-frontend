@@ -7,6 +7,7 @@ import {
   Button,
   Radio,
   Checkbox,
+  FormHelperText,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -16,6 +17,7 @@ const QuestionsOptions = ({
   onChange,
   isEditing,
   initialOptions,
+  helperText,
 }) => {
   const [options, setOptions] = useState([
     { id_opcao: 1, texto: "" },
@@ -74,6 +76,7 @@ const QuestionsOptions = ({
             placeholder="Digite uma opção"
             value={option.texto}
             onChange={(e) => handleChange(option.id_opcao, e.target.value)}
+            error={!!helperText.opcoes}
           />
 
           <IconButton
@@ -82,8 +85,15 @@ const QuestionsOptions = ({
           >
             <DeleteIcon />
           </IconButton>
+          
         </Box>
+        
       ))}
+      {helperText.opcoes && (
+        <FormHelperText error>
+          {helperText.opcoes}
+        </FormHelperText>
+      )}
       <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <Button
           variant="text"
