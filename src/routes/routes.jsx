@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomeLayout from "../layouts/HomeLayout.jsx";
 import DefaultLayout from "../layouts/DefaultLayout.jsx";
 import Home from "../pages/home/Home.jsx";
-import RegisterClient from "../pages/Clients/RegisterClient/RegisterClient.jsx";
+// import RegisterClient from "../pages/Clients/RegisterClient/RegisterClient.jsx";
 import ConsultClients from "../pages/Clients/ConsultClients/ConsultClients.jsx";
 import Login from "../pages/Auth/Login.jsx";
 import QuestionManagement from "../pages/Questions/QuestionManagement.jsx";
@@ -26,7 +26,7 @@ const Router = () => {
         <Route element={<DefaultLayout />}>
           <Route path="/app" element={<Home />} />
           <Route path="/consultar-clientes" element={<ConsultClients />} />
-          <Route path="/cadastrar-cliente" element={<RegisterClient />} />
+          {/* <Route path="/cadastrar-cliente" element={<RegisterClient />} /> */}
 
           <Route path="/consultar-questionario" element={<QuestionnaireList />} />
           <Route path="/cadastrar-questionario" element={<RegisterQuestionnaire />} />

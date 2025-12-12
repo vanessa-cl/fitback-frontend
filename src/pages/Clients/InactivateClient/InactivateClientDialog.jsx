@@ -1,9 +1,14 @@
 import { Button } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import WarningAmberTwoTone from "@mui/icons-material/WarningAmberTwoTone";
-import * as S from "./InactivateClient.styles.js";
+import * as S from "./InactivateClientDialog.styles.js";
 
-const InactivateClientModal = ({ open, onClose, client, inactivateClient }) => {
+const InactivateClientDialog = ({
+  open,
+  onClose,
+  client,
+  inactivateClient,
+}) => {
   return (
     <Dialog open={open} onClose={onClose}>
       <S.DialogContent>
@@ -31,4 +36,4 @@ const InactivateClientModal = ({ open, onClose, client, inactivateClient }) => {
   );
 };
 
-export default InactivateClientModal;
+export default InactivateClientDialog;

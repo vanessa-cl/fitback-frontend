@@ -16,68 +16,28 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { useNavigate } from "react-router";
-import EditClientModal from "../EditClient/EditClientModal.jsx";
-import InactivateClientModal from "../InactivateClient/InactivateClientModal.jsx";
+import EditClientDialog from "../EditClient/EditClientDialog.jsx";
+import InactivateClientModal from "../InactivateClient/InactivateClientDialog.jsx";
 import clienteService from "../../../services/clienteService.js";
 import Alert from "@mui/material/Alert";
-
-const rows = [
-  {
-    id_usuario: 1,
-    id_cliente: 101,
-    nome: "Ana",
-    email: "ana.silva@example.com",
-    cpf: "123.456.789-00",
-    matricula: "2024001",
-    telefone: "11987654321",
-    status: "Ativo",
-    status_aluno: "Ativo",
-    data_cadastro: "2024-01-15",
-    data_desistencia: null,
-  },
-  {
-    id_usuario: 2,
-    id_cliente: 102,
-    nome: "Bruno",
-    email: "bruno.souza@example.com",
-    cpf: "987.654.321-11",
-    matricula: "2024002",
-    telefone: "11987654322",
-    status: "Inativo",
-    status_aluno: "Inativo",
-    data_desistencia: null,
-    data_cadastro: "2024-02-20",
-  },
-  {
-    id_usuario: 3,
-    id_cliente: 103,
-    nome: "Carla",
-    email: "carla.pereira@example.com",
-    cpf: "111.222.333-44",
-    matricula: "2024003",
-    telefone: "11987654323",
-    status: "Ativo",
-    status_aluno: "Ativo",
-    data_desistencia: null,
-    data_cadastro: "2024-03-10",
-  },
-];
+import RegisterClientDialog from "../RegisterClient/RegisterClientDialog.jsx";
+import { formatCPF } from "../../../utils/index.js";
+import ClientDetailsDialog from "../ClientDetails/ClientDetailsDialog.jsx";
 
 const ConsultClients = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openFormDialog, setOpenFormDialog] = useState(false);
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState({});
   const [openInactivateModal, setOpenInactivateModal] = useState(false);
-  const [detailsMode, setDetailsMode] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "",
   });
   const { setTitle } = usePageTitle();
-  const navigate = useNavigate();
 
   const handleSearch = () => {
     if (searchTerm) {
@@ -99,16 +59,18 @@ const ConsultClients = () => {
   };
 
   const fetchClients = async () => {
-    try {
-      const response = await clienteService.getAllClientes();
-      setClients(response.data);
-    } catch (err) {
-      setSnackbar({
-        open: true,
-        message: err.response.data.message,
-        severity: "error",
+    await clienteService
+      .getAllClientes()
+      .then((response) => {
+        setClients(response.data);
+      })
+      .catch((err) => {
+        setSnackbar({
+          open: true,
+          message: err.response.data.message,
+          severity: "error",
+        });
       });
-    }
   };
 
   useEffect(() => {
@@ -119,7 +81,7 @@ const ConsultClients = () => {
 
   useEffect(() => {
     setTitle("Consultar Clientes");
-  }, [setTitle]);
+  }, []);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -169,6 +131,8 @@ const ConsultClients = () => {
       headerName: "CPF",
       flex: 1,
       minWidth: 140,
+      valueGetter: (params) => params.row.cpf,
+      renderCell: (params) => formatCPF(params.value),
     },
     {
       field: "data_cadastro",
@@ -224,8 +188,9 @@ const ConsultClients = () => {
                 if (params.row.status === "ativo") {
                   setOpenInactivateModal(true);
                 } else {
-                  updateClient(params.row, {
+                  inactivateClient(params.row, {
                     status: "ativo",
+                    data_desistencia: null,
                   });
                 }
               }}
@@ -235,7 +200,7 @@ const ConsultClients = () => {
               size="small"
               color="primary"
               onClick={() => {
-                setOpenEditModal(true);
+                setOpenEditDialog(true);
                 setSelectedClient(params.row);
               }}
             >
@@ -245,9 +210,8 @@ const ConsultClients = () => {
               size="small"
               color="error"
               onClick={() => {
-                setOpenEditModal(true);
+                setOpenDetailsDialog(true);
                 setSelectedClient(params.row);
-                setDetailsMode(true);
               }}
             >
               <VisibilityOutlinedIcon fontSize="small" />
@@ -303,6 +267,7 @@ const ConsultClients = () => {
         />
         <Button
           id="search-button"
+          name="search-button"
           variant="contained"
           color="primary"
           startIcon={<SearchIcon />}
@@ -313,15 +278,15 @@ const ConsultClients = () => {
         </Button>
         <Button
           id="new-client-button"
+          name="new-client-button"
           variant="outlined"
           color="primary"
           startIcon={<AddIcon />}
-          onClick={() => navigate("/cadastrar-cliente")}
+          onClick={() => setOpenFormDialog(true)}
         >
           Novo Cliente
         </Button>
       </S.SearchContainer>
-
       <S.ClientsList>
         <Table>
           <S.ClientTableHead>
@@ -354,21 +319,31 @@ const ConsultClients = () => {
           </TableBody>
         </Table>
       </S.ClientsList>
+      <RegisterClientDialog
+        openFormDialog={openFormDialog}
+        setOpenFormDialog={setOpenFormDialog}
+        fetchClients={fetchClients}
+        setSnackbar={setSnackbar}
+      />
       <InactivateClientModal
         open={openInactivateModal}
         onClose={() => setOpenInactivateModal(false)}
         client={selectedClient}
         inactivateClient={inactivateClient}
       />
-      <EditClientModal
-        openEditModal={openEditModal}
-        setOpenEditModal={setOpenEditModal}
+
+      <EditClientDialog
+        openFormDialog={openEditDialog}
+        setOpenFormDialog={setOpenEditDialog}
         client={selectedClient}
-        detailsMode={detailsMode}
-        setDetailsMode={setDetailsMode}
         fetchClients={fetchClients}
         setSelectedClient={setSelectedClient}
         setSnackbar={setSnackbar}
+      />
+      <ClientDetailsDialog
+        open={openDetailsDialog}
+        onClose={() => setOpenDetailsDialog(false)}
+        client={selectedClient}
       />
     </S.ConsultClientsContainer>
   );

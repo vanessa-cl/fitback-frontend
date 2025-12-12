@@ -23,11 +23,10 @@ class ClienteService extends ApiService {
   }
 
   updateCliente(id, clienteData) {
-    console.log(clienteData);
     return this.put(`/${id}`, {
       ...clienteData,
-      cpf: unformatCPF(clienteData.cpf),
-      telefone: unformatPhone(clienteData.telefone),
+      cpf: clienteData.cpf,
+      telefone: clienteData.telefone,
     });
   }
 
