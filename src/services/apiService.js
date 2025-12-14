@@ -1,11 +1,11 @@
 import axios from "axios";
 
 export class ApiService {
-  apiUrl;
+  apiUrl = import.meta.env.VITE_API_URL;
   http;
 
-  constructor(apiUrl) {
-    this.http = axios.create({ baseURL: apiUrl });
+  constructor() {
+    this.http = axios.create({ baseURL: this.apiUrl });
   }
 
   async get(endpoint) {

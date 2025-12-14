@@ -2,20 +2,16 @@ import { ApiService } from "./apiService";
 import { unformatCPF, unformatPhone } from "../utils";
 
 class ClienteService extends ApiService {
-  constructor() {
-    super("http://localhost:3001/api/clientes");
-  }
-
   getAllClientes() {
-    return this.get("/");
+    return this.get("/clientes");
   }
 
   getClienteById(id) {
-    return this.get(`/${id}`);
+    return this.get(`/clientes/${id}`);
   }
 
   createCliente(clienteData) {
-    return this.post("/", {
+    return this.post("/clientes", {
       ...clienteData,
       cpf: unformatCPF(clienteData.cpf),
       telefone: unformatPhone(clienteData.telefone),
@@ -23,7 +19,7 @@ class ClienteService extends ApiService {
   }
 
   updateCliente(id, clienteData) {
-    return this.put(`/${id}`, {
+    return this.put(`/clientes/${id}`, {
       ...clienteData,
       cpf: clienteData.cpf,
       telefone: clienteData.telefone,
@@ -31,11 +27,11 @@ class ClienteService extends ApiService {
   }
 
   deleteCliente(id) {
-    return this.delete(`/${id}`);
+    return this.delete(`/clientes/${id}`);
   }
 
   searchClientes(termo) {
-    return this.get(`/buscar/${termo}`);
+    return this.get(`/clientes/buscar/${termo}`);
   }
 }
 

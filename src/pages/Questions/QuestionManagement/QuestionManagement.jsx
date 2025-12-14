@@ -76,7 +76,7 @@ const QuestionManagement = () => {
   }, []);
 
   const fetchQuestionsByFilters = async (filters) => {
-    await questionarioService
+    await perguntaService
       .getPerguntasPorFiltros(filters)
       .then((res) => {
         setQuestions(res.data);

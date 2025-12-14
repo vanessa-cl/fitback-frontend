@@ -61,7 +61,7 @@ const RegisterQuestionnaire = () => {
   };
 
   const fetchQuestionsByFilters = async ({ termo, categoria, tipo }) => {
-    await questionarioService
+    await perguntaService
       .getPerguntasPorFiltros({
         termo,
         categoria,

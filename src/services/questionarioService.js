@@ -1,37 +1,8 @@
 import { ApiService } from "./apiService";
 
 class QuestionarioService extends ApiService {
-  constructor() {
-    super("http://localhost:3001/api");
-  }
-
   getAllQuestionarios() {
     return this.get("/questionarios");
-  }
-
-  getPerguntasPorFiltros({
-    termo = "",
-    categoria = "Todas",
-    tipo = "Todas",
-  } = {}) {
-    const params = new URLSearchParams();
-
-    if (termo.trim()) {
-      params.append("termo", termo.trim());
-    }
-    if (tipo !== "Todas") {
-      params.append("tipo", tipo);
-    }
-    if (categoria !== "Todas") {
-      params.append("idCategoria", categoria);
-    }
-
-    const query = params.toString() ? `?${params.toString()}` : "";
-    return this.get(`/perguntas/buscar${query}`);
-  }
-
-  getCategorias() {
-    return this.get("/categorias");
   }
 
   createModelo(data) {

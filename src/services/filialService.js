@@ -1,32 +1,29 @@
 import { ApiService } from "./apiService";
 
 class FilialService extends ApiService {
-  constructor() {
-    super("http://localhost:3001/api/filiais");
-  }
 
   getAllFiliais() {
-    return this.get("/");
+    return this.get("/filiais");
   }
 
   getFilialById(id) {
-    return this.get(`/${id}`);
+    return this.get(`/filiais/${id}`);
   }
 
   createFilial(filialData) {
-    return this.post("/", filialData);
+    return this.post("/filiais", filialData);
   }
 
   updateFilial(id, filialData) {
-    return this.put(`/${id}`, filialData);
+    return this.put(`/filiais/${id}`, filialData);
   }
 
   deleteFilial(id) {
-    return this.delete(`/${id}`);
+    return this.delete(`/filiais/${id}`);
   }
 
   searchFiliais(termo) {
-    return this.get(`/buscar/?termo=${termo}`);
+    return this.get(`/filiais/buscar/?termo=${termo}`);
   }
 }
 
