@@ -16,6 +16,8 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -27,7 +29,8 @@ import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../../utils/colors";
 const BranchConsultList = ({
   branches,
   handleEdit,
-  handleDelete,
+  handleDeactivate,
+  handleDeactivateConfirm,
   searchTerm,
   setSearchTerm,
 }) => {
@@ -164,7 +167,37 @@ const BranchConsultList = ({
                               }}
                             />
                           </Box>
-                          <Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={branch.status === "ativo"}
+                                  onChange={(e) => {
+                                    if (branch.status === "ativo") {
+                                      handleDeactivate(branch, "inativo");
+                                    } else {
+                                      handleDeactivateConfirm(branch, "ativo");
+                                    }
+                                  }}
+                                  sx={{
+                                    "& .MuiSwitch-switchBase.Mui-checked": {
+                                      color: PRIMARY_COLOR,
+                                    },
+                                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                                      {
+                                        backgroundColor: PRIMARY_COLOR,
+                                      },
+                                  }}
+                                />
+                              }
+                              sx={{ mr: 0, ml: 0, width: "100%" }}
+                            />
                             <IconButton
                               onClick={() => handleView(branch)}
                               sx={{ color: PRIMARY_COLOR }}
@@ -176,12 +209,6 @@ const BranchConsultList = ({
                               sx={{ color: SECONDARY_COLOR }}
                             >
                               <EditIcon />
-                            </IconButton>
-                            <IconButton
-                              onClick={() => handleDelete(branch)}
-                              sx={{ color: "#d32f2f" }}
-                            >
-                              <DeleteIcon />
                             </IconButton>
                           </Box>
                         </Box>

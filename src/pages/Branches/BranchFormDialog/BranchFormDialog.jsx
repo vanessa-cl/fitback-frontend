@@ -152,29 +152,6 @@ const BranchFormDialog = ({
                 },
               }}
             />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={currentBranch.status === "ativo"}
-                  onChange={(e) =>
-                    setCurrentBranch({
-                      ...currentBranch,
-                      status: e.target.checked ? "ativo" : "inativo",
-                    })
-                  }
-                  sx={{
-                    "& .MuiSwitch-switchBase.Mui-checked": {
-                      color: PRIMARY_COLOR,
-                    },
-                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                      backgroundColor: PRIMARY_COLOR,
-                    },
-                  }}
-                />
-              }
-              label={currentBranch.status === "ativo" ? "Ativa" : "Inativa"}
-              sx={{ mb: 2, mr: 0, width: "100%" }}
-            />
           </Box>
 
           <Box sx={{ display: "flex", gap: 2 }}>

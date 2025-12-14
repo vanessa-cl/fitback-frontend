@@ -8,7 +8,11 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import { PRIMARY_COLOR, DARK_PRIMARY, SECONDARY_COLOR } from "../../../utils/colors";
+import {
+  PRIMARY_COLOR,
+  DARK_PRIMARY,
+  SECONDARY_COLOR,
+} from "../../../utils/colors";
 import {
   Delete as DeleteIcon,
   Cancel as CancelIcon,
@@ -18,15 +22,15 @@ const BranchDeleteDialog = ({ open, onClose, onConfirm, branch }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <Box sx={{ flex: "0 0 41.6667%", p: 2 }}>
-        <DialogTitle>Excluir Filial</DialogTitle>
+        <DialogTitle>Inativar Filial</DialogTitle>
         <DialogContent>
           <Typography>
-            Tem certeza que deseja excluir a filial "{branch?.nome}"? Essa ação
-            não pode ser desfeita.
+            Tem certeza que deseja inativar a filial "{branch?.nome}"?
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button
+            variant="outlined"
             sx={{
               width: "50%",
               py: 1.5,
@@ -34,13 +38,11 @@ const BranchDeleteDialog = ({ open, onClose, onConfirm, branch }) => {
               color: SECONDARY_COLOR,
             }}
             onClick={() => onClose()}
-            startIcon={<CancelIcon />}
           >
             Cancelar
           </Button>
           <Button
-            onClick={onConfirm}
-            startIcon={<DeleteIcon />}
+            onClick={() => onConfirm(branch, "inativo")}
             sx={{
               width: "50%",
               bgcolor: PRIMARY_COLOR,
@@ -48,7 +50,7 @@ const BranchDeleteDialog = ({ open, onClose, onConfirm, branch }) => {
               "&:hover": { bgcolor: DARK_PRIMARY },
             }}
           >
-            Excluir
+            Inativar
           </Button>
         </DialogActions>
       </Box>
