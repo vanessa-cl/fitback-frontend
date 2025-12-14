@@ -185,8 +185,10 @@ const QuestionnaireList = () => {
 
   const handleEdit = (q) => {
     try {
-      console.log("Navigating to edit:", `/editar-questionario/${q.id}`);
-      navigate(`/editar-questionario/${q.id}`, { state: { questionnaire: q } });
+      console.log("Navigating to edit:", `/editar-questionario/${q.id_modelo}`);
+      navigate(`/editar-questionario/${q.id_modelo}`, {
+        state: { questionnaire: q },
+      });
     } catch (error) {
       console.error("Navigation error:", error);
     }

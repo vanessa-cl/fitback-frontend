@@ -7,43 +7,25 @@ import {
   TextField,
   Button,
   MenuItem,
-  Paper,
   Grid,
   FormControl,
   InputLabel,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
+  InputAdornment,
+  IconButton,
+  FormHelperText,
+  Snackbar,
+  Alert,
 } from "@mui/material";
-import {
-  ArrowBack,
-  ArrowForward,
-  RadioButtonUnchecked,
-  CheckCircle,
-} from "@mui/icons-material";
+import { ArrowBack, ArrowForward, Clear } from "@mui/icons-material";
 import questionarioService from "../../../services/questionarioService";
 import { styles } from "./RegisterQuestionnaire.styles";
-
-const questionTypeLabel = {
-  aberta: "Aberta",
-  multipla_escolha: "Múltipla Escolha",
-  escala: "Escala",
-};
-
-const getQuestionOptionsText = (pergunta) => {
-  if (pergunta.tipo === "multipla_escolha" && pergunta.opcoes) {
-    return pergunta.opcoes.map((option) => option.texto).join(", ");
-  }
-  return "N/A";
-};
+import categoriaService from "../../../services/categoriaService.js";
+import QuestionsList from "../QuestionsList/QuestionsList.jsx";
+import perguntaService from "../../../services/perguntaService.js";
 
 const INITIAL_FORM_STATE = {
-  titulo: "",
+  nome: "",
   descricao: "",
   perguntasIds: [],
 };
@@ -51,19 +33,23 @@ const INITIAL_FORM_STATE = {
 const RegisterQuestionnaire = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const editModelId = id;
   const { setTitle } = usePageTitle();
   const [form, setForm] = useState(INITIAL_FORM_STATE);
-
-  const [perguntasFiltradas, setPerguntasFiltradas] = useState([]);
-
-  const [filtroNome, setFiltroNome] = useState("");
-  const [filtroCategoria, setFiltroCategoria] = useState("Todas");
-  const [filtroTipo, setFiltroTipo] = useState("Todas");
-
-  const [categorias, setCategorias] = useState([]);
+  const [filteredQuestions, setFilteredQuestions] = useState([]);
+  const [filters, setFilters] = useState({
+    termo: "",
+    categoria: "Todas",
+    tipo: "Todas",
+  });
+  const [categories, setCategories] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [helperText, setHelperText] = useState({});
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -74,70 +60,7 @@ const RegisterQuestionnaire = () => {
     setPage(0);
   };
 
-  useEffect(() => {
-    setTitle(editModelId ? "Editar Questionário" : "Cadastrar Questionário");
-  }, [setTitle, editModelId]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    (async () => {
-      try {
-        const resCat = await questionarioService.getCategorias();
-        if (mounted) setCategorias(resCat.data || []);
-      } catch {
-        if (mounted) setCategorias([]);
-      }
-
-      // carregar perguntas iniciais (usa aplicarFiltros internamente)
-      await aplicarFiltros();
-
-      // se for edição, carregar modelo e perguntas já salvas
-      if (editModelId) {
-        try {
-          const resModel = await questionarioService.getModelo(editModelId);
-          if (mounted) {
-            const modelo = resModel.data || {};
-            setTitulo(modelo.nome || "");
-            setDescricao(modelo.descricao || "");
-          }
-        } catch {
-          // ignore
-        }
-
-        try {
-          const resModelPerg = await questionarioService.getModeloPerguntas(
-            editModelId
-          );
-          if (mounted) {
-            const perguntas = resModelPerg.data || [];
-            setPerguntasSelecionadas(
-              perguntas.map((p) => ({
-                id: p.id_pergunta,
-                conteudo: p.conteudo,
-                tipo: p.tipo,
-                categoria: p.categoria,
-                ordem: p.ordem,
-              }))
-            );
-          }
-        } catch {
-          // ignore
-        }
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [editModelId]);
-
-  const aplicarFiltros = async ({
-    termo = filtroNome,
-    categoria = filtroCategoria,
-    tipo = filtroTipo,
-  } = {}) => {
-    console.log("Aplicando filtros:", { termo, categoria, tipo });
+  const fetchQuestionsByFilters = async ({ termo, categoria, tipo }) => {
     await questionarioService
       .getPerguntasPorFiltros({
         termo,
@@ -145,116 +68,242 @@ const RegisterQuestionnaire = () => {
         tipo,
       })
       .then((res) => {
-        console.log(res);
-        setPerguntasFiltradas(res.data);
+        setFilteredQuestions(res.data);
       })
-      .catch(() => setPerguntasFiltradas([]));
+      .catch((err) => {
+        setFilteredQuestions([]);
+        setSnackbar({
+          open: true,
+          message:
+            err.response?.data?.error || "Erro ao carregar dados das perguntas",
+          severity: "error",
+        });
+      });
   };
 
-  const togglePergunta = (pergunta) => {
-    const jaExiste = form.perguntas.find((p) => p.id === pergunta.id_pergunta);
-    if (jaExiste) {
+  const fetchAllQuestions = async () => {
+    await perguntaService
+      .getAllPerguntas()
+      .then((res) => {
+        setFilteredQuestions(res.data);
+      })
+      .catch((err) => {
+        setFilteredQuestions([]);
+        setSnackbar({
+          open: true,
+          message:
+            err.response?.data?.error || "Erro ao carregar dados das perguntas",
+          severity: "error",
+        });
+      });
+  };
+
+  const fetchQuestionsFromQuestionnaire = async (id) => {
+    await questionarioService
+      .getModelo(id)
+      .then((res) => {
+        const modelo = res.data || {};
+        setForm((prev) => ({
+          ...prev,
+          nome: modelo.nome || "",
+          descricao: modelo.descricao || "",
+        }));
+        const filtered = Array.from(
+          new Map(
+            [...modelo.perguntas, ...filteredQuestions].map((item) => [
+              item.id,
+              item,
+            ])
+          ).values()
+        );
+        setForm((prev) => ({
+          ...prev,
+          perguntasIds: modelo.perguntas.map((p) => p.id_pergunta) || [],
+        }));
+        setFilteredQuestions(filtered);
+      })
+      .catch((err) => {
+        setFilteredQuestions([]);
+        setSnackbar({
+          open: true,
+          message:
+            err.response?.data?.error ||
+            "Erro ao carregar dados do questionário",
+          severity: "error",
+        });
+      });
+  };
+
+  const fetchCategories = async () => {
+    await categoriaService
+      .getAllCategorias()
+      .then((res) => {
+        setCategories(res.data);
+      })
+      .catch((err) => {
+        setFilteredQuestions([]);
+        setSnackbar({
+          open: true,
+          message:
+            err.response?.data?.error ||
+            "Erro ao carregar categorias de perguntas",
+          severity: "error",
+        });
+      });
+  };
+
+  useEffect(() => {
+    setTitle(id ? "Editar Questionário" : "Cadastrar Questionário");
+  }, [setTitle, id]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchAllQuestions();
+  }, []);
+
+  useEffect(() => {
+    if (id) {
+      fetchQuestionsFromQuestionnaire(id);
+    } else if (
+      filters.termo ||
+      filters.categoria !== "Todas" ||
+      filters.tipo !== "Todas"
+    ) {
+      fetchQuestionsByFilters(filters);
+    }
+  }, [id]);
+
+  const toggleQuestion = (question) => {
+    const exists = form.perguntasIds.find((p) => p === question.id_pergunta);
+    if (exists) {
       setForm((prev) => ({
         ...prev,
-        perguntas: prev.perguntas.filter((p) => p.id !== pergunta.id_pergunta),
+        perguntasIds: prev.perguntasIds.filter(
+          (p) => p !== question.id_pergunta
+        ),
       }));
     } else {
       setForm((prev) => ({
         ...prev,
-        perguntas: [
-          ...prev.perguntas,
-          {
-            id: pergunta.id_pergunta,
-            conteudo: pergunta.conteudo,
-            tipo: pergunta.tipo,
-            categoria: pergunta.categoria,
-          },
-        ],
+        perguntasIds: [...prev.perguntasIds, question.id_pergunta],
       }));
     }
   };
 
-  const handleNext = async () => {
-    if (!form.titulo.trim()) {
-      alert("Por favor, insira um título para o questionário");
-      return;
-    }
-    if (form.perguntasIds.length === 0) {
-      alert("Por favor, selecione pelo menos uma pergunta");
-      return;
-    }
-
-    try {
-      let id_modelo = editModelId;
-      if (!editModelId) {
-        const payload = { nome: form.titulo, descricao: form.descricao };
-        const res = await questionarioService.createModelo(payload);
-
-        id_modelo = res?.data?.id ?? res?.data?.insertId ?? res?.data ?? null;
-        if (
-          !id_modelo &&
-          res &&
-          typeof res === "object" &&
-          res.data &&
-          typeof res.data === "object"
-        ) {
-          id_modelo =
-            res.data.id ?? res.data.insertId ?? res.data.insert_id ?? null;
-        }
-
-        if (!id_modelo) {
-          console.error("Não foi possível obter o id do modelo criado:", res);
-          alert(
-            "Erro ao criar o questionário (id não retornado). Verifique o console para mais detalhes."
-          );
-          return;
-        }
-      } else {
-        // atualizar nome/descricao
-        await questionarioService.updateModelo(editModelId, {
-          nome: form.titulo,
-          descricao: form.descricao,
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    await questionarioService
+      .createModelo({
+        nome: form.nome,
+        descricao: form.descricao,
+        perguntasIds: form.perguntasIds,
+      })
+      .then((res) => {
+        setSnackbar({
+          open: true,
+          message: "Questionário cadastrado com sucesso!",
+          severity: "success",
         });
-      }
+        const newId = res?.data?.id || null;
+        setTimeout(() => {
+          navigate(`/ordenar-questionario/${newId}`, { replace: true });
+        }, 6000);
+      })
+      .catch((err) => {
+        if (err.response?.data?.validationErrors) {
+          return setHelperText(err.response?.data?.validationErrors);
+        }
+        setSnackbar({
+          open: true,
+          message: err.response.data.error || "Erro ao cadastrar questionário",
+          severity: "error",
+        });
+      });
+  };
 
-      // garantir id como string/number e navegar para ordenação
-      id_modelo =
-        typeof id_modelo === "object"
-          ? JSON.stringify(id_modelo)
-          : String(id_modelo);
-      console.log("Navegando para ordenar-questionario com id:", id_modelo);
-      navigate(`/ordenar-questionario/${id_modelo}`, {
-        state: { perguntas: form.perguntasIds },
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    await questionarioService
+      .updateModelo(id, {
+        nome: form.nome,
+        descricao: form.descricao,
+        perguntasIds: form.perguntasIds,
+      })
+      .then((res) => {
+        setSnackbar({
+          open: true,
+          message: "Questionário atualizado com sucesso!",
+          severity: "success",
+        });
+        setTimeout(() => {
+          navigate(`/ordenar-questionario/${id}`, { replace: true });
+        }, 6000);
+      })
+      .catch((err) => {
+        if (err.response?.data?.validationErrors) {
+          return setHelperText(err.response?.data?.validationErrors);
+        }
+        setSnackbar({
+          open: true,
+          message: err.response.data.error || "Erro ao atualizar questionário",
+          severity: "error",
+        });
       });
-    } catch (err) {
-      // console.error("Erro em handleNext:", err);
-      // const msg =
-      //   err?.response?.data?.message ||
-      //   err?.message ||
-      //   "Erro ao criar/atualizar o modelo";
-      // alert(msg);
-      navigate(`/ordenar-questionario/${10}`, {
-        state: { perguntas: form.perguntasIds },
-      });
-    }
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
     <Box sx={styles.container}>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
       <Typography variant="h6" sx={styles.sectionTitle}>
         1 - Preencha os dados do questionário:
       </Typography>
-
       <Box sx={styles.formSection}>
         <TextField
           label="Título"
-          value={form.titulo}
+          value={form.nome}
           onChange={(e) =>
-            setForm((prev) => ({ ...prev, titulo: e.target.value }))
+            setForm((prev) => ({ ...prev, nome: e.target.value }))
           }
           fullWidth
           required
           sx={{ mb: 2 }}
+          error={!!helperText.nome}
+          helperText={helperText.nome}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setForm((prev) => ({ ...prev, nome: "" }))}
+                  >
+                    <Clear />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+            htmlInput: {
+              minLength: 3,
+              maxLength: 100,
+            },
+          }}
         />
         <TextField
           label="Descrição"
@@ -265,6 +314,28 @@ const RegisterQuestionnaire = () => {
           multiline
           rows={3}
           fullWidth
+          required
+          error={!!helperText.descricao}
+          helperText={helperText.descricao}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() =>
+                      setForm((prev) => ({ ...prev, descricao: "" }))
+                    }
+                  >
+                    <Clear />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+            htmlInput: {
+              minLength: 10,
+              maxLength: 255,
+            },
+          }}
         />
       </Box>
 
@@ -284,40 +355,67 @@ const RegisterQuestionnaire = () => {
           >
             <TextField
               label="Buscar por conteúdo"
-              value={filtroNome}
+              value={filters.termo}
               onChange={(e) => {
-                setFiltroNome(e.target.value);
-                aplicarFiltros({ termo: e.target.value });
+                setFilters((prev) => ({ ...prev, termo: e.target.value }));
+                fetchQuestionsByFilters({ termo: e.target.value });
               }}
               sx={{ width: "60%" }}
               fullWidth
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => {
+                          setFilters((prev) => ({ ...prev, termo: "" }));
+                          fetchAllQuestions();
+                        }}
+                      >
+                        <Clear />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+                htmlInput: {
+                  minLength: 3,
+                  maxLength: 100,
+                },
+              }}
             />
             <FormControl fullWidth sx={{ width: "30%" }}>
               <InputLabel>Categoria</InputLabel>
               <Select
-                value={filtroCategoria}
+                value={filters.categoria}
                 label="Categoria"
                 onChange={(e) => {
-                  setFiltroCategoria(e.target.value);
-                  aplicarFiltros({ categoria: e.target.value });
+                  setFilters((prev) => ({
+                    ...prev,
+                    categoria: e.target.value,
+                  }));
+                  fetchQuestionsByFilters({ categoria: e.target.value });
                 }}
               >
                 <MenuItem value="Todas">Todas</MenuItem>
-                {categorias.map((cat) => (
-                  <MenuItem key={cat.id_categoria} value={cat.id_categoria}>
-                    {cat.nome}
-                  </MenuItem>
-                ))}
+                {categories.length > 0 &&
+                  categories.map((item) => (
+                    <MenuItem key={item.id_categoria} value={item.id_categoria}>
+                      {item.nome}
+                    </MenuItem>
+                  ))}
               </Select>
             </FormControl>
             <FormControl fullWidth sx={{ width: "30%" }}>
               <InputLabel>Tipo de Pergunta</InputLabel>
               <Select
-                value={filtroTipo}
+                value={filters.tipo}
                 label="Tipo de Pergunta"
                 onChange={(e) => {
-                  setFiltroTipo(e.target.value);
-                  aplicarFiltros({ tipo: e.target.value });
+                  setFilters((prev) => ({
+                    ...prev,
+                    tipo: e.target.value,
+                  }));
+                  fetchQuestionsByFilters({ tipo: e.target.value });
                 }}
               >
                 <MenuItem value="Todas">Todas</MenuItem>
@@ -329,76 +427,24 @@ const RegisterQuestionnaire = () => {
           </Box>
         </Grid>
       </Box>
-      {console.log(form)}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={styles.tableHeaderRow}>
-              <TableCell width="50">
-                <strong>Seleção</strong>
-              </TableCell>
-              <TableCell width="80">
-                <strong>Código</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Pergunta</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Categoria</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Tipo</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Opções</strong>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {perguntasFiltradas
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((pergunta) => {
-                const selecionada = form.perguntasIds.includes(
-                  pergunta.id_pergunta
-                );
-                return (
-                  <TableRow
-                    key={pergunta.id_pergunta}
-                    hover
-                    onClick={() => togglePergunta(pergunta)}
-                    sx={selecionada ? styles.selectedRow : styles.tableRow}
-                  >
-                    <TableCell>
-                      {selecionada ? (
-                        <CheckCircle sx={styles.checkIcon} />
-                      ) : (
-                        <RadioButtonUnchecked sx={styles.uncheckedIcon} />
-                      )}
-                    </TableCell>
-                    <TableCell>{pergunta.id_pergunta}</TableCell>
-                    <TableCell>{pergunta.conteudo}</TableCell>
-                    <TableCell>{pergunta.categoria}</TableCell>
-                    <TableCell>{questionTypeLabel[pergunta.tipo]}</TableCell>
-                    <TableCell>{getQuestionOptionsText(pergunta)}</TableCell>
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        component="div"
-        count={perguntasFiltradas.length}
-        page={page}
-        onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
-        labelRowsPerPage="Linhas por página:"
-      />
-      <Box sx={styles.buttonContainer}>
+      <FormControl fullWidth error={!!helperText.perguntasIds}>
+        <QuestionsList
+          filteredQuestions={filteredQuestions}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          form={form}
+          toggleQuestion={toggleQuestion}
+          handleChangePage={handleChangePage}
+          handleChangeRowsPerPage={handleChangeRowsPerPage}
+        />
+        {helperText.perguntasIds && (
+          <FormHelperText>{helperText.perguntasIds}</FormHelperText>
+        )}
+      </FormControl>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4, gap: 2 }}>
         <Button
+          id="back-button"
+          name="back-button"
           startIcon={<ArrowBack />}
           onClick={() => navigate("/consultar-questionario")}
           sx={styles.backButton}
@@ -406,9 +452,11 @@ const RegisterQuestionnaire = () => {
           Voltar
         </Button>
         <Button
+          id="next-button"
+          name="next-button"
           variant="contained"
           endIcon={<ArrowForward />}
-          onClick={handleNext}
+          onClick={id ? handleUpdate : handleAdd}
           sx={styles.nextButton}
         >
           Próxima Etapa

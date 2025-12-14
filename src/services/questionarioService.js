@@ -9,20 +9,24 @@ class QuestionarioService extends ApiService {
     return this.get("/questionarios");
   }
 
-  getPerguntasPorFiltros({ termo = "", categoria = "Todas", tipo = "Todas" } = {}) {
-    console.log("Filtros recebidos:", { termo, categoria, tipo });
+  getPerguntasPorFiltros({
+    termo = "",
+    categoria = "Todas",
+    tipo = "Todas",
+  } = {}) {
     const params = new URLSearchParams();
+
+    if (termo.trim()) {
+      params.append("termo", termo.trim());
+    }
     if (tipo !== "Todas") {
       params.append("tipo", tipo);
     }
     if (categoria !== "Todas") {
       params.append("idCategoria", categoria);
     }
-    if (termo.trim()) {
-      params.append("termo", termo.trim());
-    }
+
     const query = params.toString() ? `?${params.toString()}` : "";
-    console.log("Query string construída:", query);
     return this.get(`/perguntas/buscar${query}`);
   }
 
@@ -46,16 +50,18 @@ class QuestionarioService extends ApiService {
     return this.get(`/questionarios/${id}/perguntas`);
   }
 
-  saveModeloPerguntas(id, perguntas) {
-    return this.post(`/questionarios/${id}/perguntas`, { perguntas });
-  }
-
   getModelosByQuery(termo) {
     return this.get(`/questionarios/buscar?termo=${termo}`);
   }
 
   deleteModelo(id) {
     return this.delete(`/questionarios/${id}`);
+  }
+
+  updateOrdemPerguntas(idModelo, novaOrdem) {
+    return this.put(`/questionarios/${idModelo}/ordem-perguntas`, {
+      perguntasIds: novaOrdem,
+    });
   }
 }
 

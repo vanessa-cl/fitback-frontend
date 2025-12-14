@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { usePageTitle } from "../../../context/PageTitleContext.jsx";
 import {
   Box,
@@ -14,6 +14,8 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -24,24 +26,30 @@ import {
 import questionarioService from "../../../services/questionarioService";
 import { styles } from "./QuestionnaireOrder.styles";
 
+const questionTypeLabel = {
+  aberta: "Aberta",
+  multipla_escolha: "Múltipla Escolha",
+  escala: "Escala",
+};
+
 const QuestionnaireOrder = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
   const { setTitle } = usePageTitle();
-  const { perguntas: perguntasIniciais } = location.state || {};
-
-  const [perguntas, setPerguntas] = useState(
-    perguntasIniciais?.map((p, index) => ({ ...p, ordem: index + 1 })) || []
-  );
+  const [questions, setQuestions] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   const handleSort = (key) => {
     let direction = "asc";
     if (sortConfig.key === key && sortConfig.direction === "asc")
       direction = "desc";
 
-    const sorted = [...perguntas].sort((a, b) => {
+    const sorted = [...questions].sort((a, b) => {
       if (key === "id") {
         return direction === "asc" ? a.id - b.id : b.id - a.id;
       }
@@ -53,13 +61,13 @@ const QuestionnaireOrder = () => {
     });
 
     const withOrder = sorted.map((p, idx) => ({ ...p, ordem: idx + 1 }));
-    setPerguntas(withOrder);
+    setQuestions(withOrder);
     setSortConfig({ key, direction });
   };
 
-  const moverPergunta = (index, direcao) => {
-    const novaPosicao = index + direcao;
-    if (novaPosicao < 0 || novaPosicao >= perguntas.length) return;
+  const moveQuestion = (index, direction) => {
+    const newPosition = index + direction;
+    if (newPosition < 0 || newPosition >= questions.length) return;
 
     const move = (arr, from, to) => {
       const copy = arr.slice();
@@ -68,66 +76,88 @@ const QuestionnaireOrder = () => {
       return copy.map((p, idx) => ({ ...p, ordem: idx + 1 }));
     };
 
-    setPerguntas((prev) => move(prev, index, novaPosicao));
+    setQuestions((prev) => move(prev, index, newPosition));
   };
 
   const handleSave = async () => {
     if (!id) {
-      alert("ID do modelo não encontrado. Volte e tente novamente.");
+      setSnackbar({
+        open: true,
+        message: "ID do modelo não encontrado. Volte e tente novamente.",
+        severity: "error",
+      });
       return;
     }
 
-    const payload = perguntas.map((p) => ({
-      id_pergunta: p.id,
-      ordem: p.ordem,
-    }));
+    const payload = questions.map((p) => p.id_pergunta);
 
-    try {
-      await questionarioService.saveModeloPerguntas(id, payload);
-      alert("Questionário salvo com sucesso!");
-      navigate("/consultar-questionario", { replace: true });
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao salvar ordem das perguntas");
-    }
+    await questionarioService
+      .updateOrdemPerguntas(id, payload)
+      .then((res) => {
+        setSnackbar({
+          open: true,
+          message: "Questionário salvo com sucesso!",
+          severity: "success",
+        });
+        setTimeout(() => {
+          navigate("/consultar-questionario", { replace: true });
+        }, 6000);
+      })
+      .catch((err) => {
+        setSnackbar({
+          open: true,
+          message:
+            err.response?.data?.error || "Erro ao salvar o questionário.",
+          severity: "error",
+        });
+      });
   };
 
   useEffect(() => {
-    setTitle("Cadastrar Questionário");
+    setTitle("Ordenar Perguntas do Questionário");
   }, [setTitle]);
 
+  const fetchQuestions = async () => {
+    await questionarioService
+      .getModelo(id)
+      .then((res) => {
+        setQuestions(res.data.perguntas);
+      })
+      .catch((err) => {
+        setSnackbar({
+          open: true,
+          message:
+            err.response?.data?.error || "Erro ao carregar as perguntas.",
+          severity: "error",
+        });
+      });
+  };
+
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      if (!id) return;
+    fetchQuestions();
+  }, []);
 
-      // se não recebemos perguntas via navigation state, buscar do backend
-      if (!perguntasIniciais || perguntasIniciais.length === 0) {
-        try {
-          const resPerg = await questionarioService.getModeloPerguntas(id);
-          if (mounted) {
-            const perguntasApi = (resPerg.data || []).map((p, idx) => ({
-              id: p.id_pergunta,
-              conteudo: p.conteudo,
-              tipo: p.tipo,
-              categoria: p.categoria,
-              ordem: p.ordem || idx + 1,
-            }));
-            setPerguntas(perguntasApi);
-          }
-        } catch {
-          // ignore
-        }
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [id, perguntasIniciais]);
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const content = (
     <Box sx={styles.container}>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
       <Typography variant="h6" sx={styles.sectionTitle}>
         3 - Perguntas selecionadas em ordem de exibição, use as setas para
         alterar a ordem:
@@ -215,24 +245,24 @@ const QuestionnaireOrder = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {perguntas.map((pergunta, index) => (
-              <TableRow key={pergunta.id} hover sx={styles.tableRow}>
-                <TableCell>{pergunta.id}</TableCell>
-                <TableCell>{pergunta.categoria}</TableCell>
-                <TableCell>{pergunta.tipo}</TableCell>
+            {questions.map((pergunta, index) => (
+              <TableRow key={pergunta.id_pergunta} hover sx={styles.tableRow}>
+                <TableCell>{pergunta.id_pergunta}</TableCell>
+                <TableCell>{pergunta.nome_categoria}</TableCell>
+                <TableCell>{questionTypeLabel[pergunta.tipo]}</TableCell>
                 <TableCell>{pergunta.conteudo}</TableCell>
                 <TableCell align="center">
                   <IconButton
                     size="small"
-                    onClick={() => moverPergunta(index, -1)}
+                    onClick={() => moveQuestion(index, -1)}
                     disabled={index === 0}
                   >
                     <KeyboardArrowUp />
                   </IconButton>
                   <IconButton
                     size="small"
-                    onClick={() => moverPergunta(index, 1)}
-                    disabled={index === perguntas.length - 1}
+                    onClick={() => moveQuestion(index, 1)}
+                    disabled={index === questions.length - 1}
                   >
                     <KeyboardArrowDown />
                   </IconButton>
@@ -243,7 +273,7 @@ const QuestionnaireOrder = () => {
         </Table>
       </TableContainer>
 
-      <Box sx={styles.navigationContainer}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3, gap: 2 }}>
         <Button
           startIcon={<ArrowBack />}
           onClick={() => navigate(-1)}
@@ -263,7 +293,7 @@ const QuestionnaireOrder = () => {
     </Box>
   );
 
-  if (!perguntas.length) {
+  if (!questions.length) {
     return (
       <Box sx={{ p: 3 }}>
         <Typography color="error">

@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { usePageTitle } from "../../../context/PageTitleContext.jsx";
+import { useState } from "react";
 import * as S from "./RegisterClientDialog.styles.js";
 import clienteService from "../../../services/clienteService.js";
 import ClientFormBase from "../ClientFormBase/ClientFormBase.jsx";
@@ -63,7 +62,6 @@ const RegisterClientDialog = ({
       onClose={() => setOpenFormDialog(false)}
     >
       <h3>Cadastrar Novo Cliente</h3>
-      {console.log(formClient)}
       <ClientFormBase
         formClient={formClient}
         setFormClient={setFormClient}

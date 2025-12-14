@@ -39,6 +39,7 @@ export const styles = {
     }
   },
   selectedRow: {
+    cursor: 'pointer',
     backgroundColor: 'rgba(178, 94, 9, 0.08)',
     '&:hover': {
       backgroundColor: 'rgba(178, 94, 9, 0.12)'
