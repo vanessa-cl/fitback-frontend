@@ -84,6 +84,9 @@ const ClientsManagement = () => {
   }, []);
 
   const handleSearchChange = (e) => {
+    if (e.target.value === "") {
+      fetchClients();
+    }
     setSearchTerm(e.target.value);
   };
 
@@ -300,7 +303,7 @@ const ClientsManagement = () => {
             {clients.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length} align="center">
-                  Nenhum cliente encontrado.
+                  Nenhum cliente encontrado para os filtros aplicados.
                 </TableCell>
               </TableRow>
             ) : (

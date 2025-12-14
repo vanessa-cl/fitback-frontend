@@ -5,7 +5,7 @@ import Home from "../pages/home/Home.jsx";
 import ClientsManagement from "../pages/Clients/ClientsManagement/ClientsManagement.jsx";
 import Login from "../pages/Auth/Login/Login.jsx";
 import QuestionManagement from "../pages/Questions/QuestionManagement/QuestionManagement.jsx";
-import QuestionnaireList from "../pages/Questionnaire/ConsultQuestionnaire/QuestionnaireList.jsx";
+import ConsultQuestionnaire from "../pages/Questionnaire/ConsultQuestionnaire/ConsultQuestionnaire.jsx";
 import RegisterQuestionnaire from "../pages/Questionnaire/RegisterQuestionnaire/RegisterQuestionnaire.jsx";
 import QuestionnaireOrder from "../pages/Questionnaire/QuestionnaireOrder/QuestionnaireOrder.jsx";
 import BranchManagement from "../pages/Branches/BranchManagement/BranchManagement.jsx";
@@ -24,7 +24,7 @@ const Router = () => {
           <Route path="/gerenciar-clientes" element={<ClientsManagement />} />
           <Route
             path="/consultar-questionario"
-            element={<QuestionnaireList />}
+            element={<ConsultQuestionnaire />}
           />
           <Route
             path="/cadastrar-questionario"

@@ -18,8 +18,6 @@ import {
   Assignment,
   Dashboard,
 } from "@mui/icons-material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
@@ -31,7 +29,7 @@ const Home = () => {
       title: "Clientes",
       description: "Gerencie os clientes do sistema",
       icon: <People sx={{ fontSize: 40 }} />,
-      path: "/consultar-clientes",
+      path: "/gerenciar-clientes",
       color: theme.palette.primary.main,
       disabled: false,
     },

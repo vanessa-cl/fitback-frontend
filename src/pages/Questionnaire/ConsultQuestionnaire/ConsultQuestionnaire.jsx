@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import {
   Box,
@@ -20,12 +20,9 @@ import {
   Chip,
   InputAdornment,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Alert,
   Snackbar,
+  Switch,
 } from "@mui/material";
 import {
   Add,
@@ -34,112 +31,13 @@ import {
   Search,
   PlaylistAddCheck,
   BarChart,
-  QuestionAnswer,
-  Warning as WarningIcon,
 } from "@mui/icons-material";
 import SearchOffIcon from "@mui/icons-material/SearchOff";
 import { usePageTitle } from "../../../context/PageTitleContext.jsx";
 import questionarioService from "../../../services/questionarioService.js";
+import DeactivateQuestionnaire from "../DeactivateQuestionnaire/DeactivateQuestionnaire.jsx";
 
-// Componente Modal de Exclusão
-const ModalDeleteQuestionnaire = ({
-  open,
-  onClose,
-  onConfirm,
-  title = "Confirmar Exclusão",
-  message = "Tem certeza que deseja excluir este questionário?",
-  confirmText = "Excluir",
-  cancelText = "Cancelar",
-  itemName = "",
-  severity = "warning",
-}) => {
-  const handleConfirm = () => {
-    onConfirm();
-    onClose();
-  };
-
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      aria-labelledby="confirmation-dialog-title"
-      maxWidth="sm"
-      fullWidth
-    >
-      <DialogTitle id="confirmation-dialog-title" sx={{ pb: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <WarningIcon color="warning" />
-          <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-            {title}
-          </Typography>
-        </Box>
-      </DialogTitle>
-
-      <DialogContent sx={{ pt: 1 }}>
-        <Alert severity={severity} sx={{ mb: 2 }}>
-          <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-            {message}
-          </Typography>
-        </Alert>
-
-        {itemName && (
-          <Box
-            sx={{
-              p: 2,
-              bgcolor: "grey.50",
-              borderRadius: 1,
-              border: "1px solid",
-              borderColor: "grey.300",
-              mt: 2,
-            }}
-          >
-            <Typography
-              variant="body2"
-              sx={{
-                fontStyle: "italic",
-                color: "text.secondary",
-                textAlign: "center",
-              }}
-            >
-              "{itemName}"
-            </Typography>
-          </Box>
-        )}
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mt: 2, textAlign: "center" }}
-        >
-          Esta ação não pode ser desfeita.
-        </Typography>
-      </DialogContent>
-
-      <DialogActions sx={{ p: 3, gap: 1 }}>
-        <Button
-          onClick={onClose}
-          variant="outlined"
-          size="large"
-          sx={{ flex: 1 }}
-        >
-          {cancelText}
-        </Button>
-        <Button
-          onClick={handleConfirm}
-          variant="contained"
-          color="error"
-          size="large"
-          startIcon={<Delete />}
-          sx={{ flex: 1 }}
-        >
-          {confirmText}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-const QuestionnaireList = () => {
+const ConsultQuestionnaire = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -185,7 +83,6 @@ const QuestionnaireList = () => {
 
   const handleEdit = (q) => {
     try {
-      console.log("Navigating to edit:", `/editar-questionario/${q.id_modelo}`);
       navigate(`/editar-questionario/${q.id_modelo}`, {
         state: { questionnaire: q },
       });
@@ -199,19 +96,30 @@ const QuestionnaireList = () => {
     setDeleteModalOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = (selectedQuestionnaire, newStatus) => {
     if (selectedQuestionnaire) {
       questionarioService
-        .deleteModelo(selectedQuestionnaire.id_modelo)
+        .updateModelo(selectedQuestionnaire.id_modelo, {
+          ...selectedQuestionnaire,
+          status_questionario: newStatus,
+          perguntasIds: selectedQuestionnaire.perguntas.map(
+            (p) => p.id_pergunta
+          ),
+        })
         .then(() => {
           consultQuestionnaires();
           setSelectedQuestionnaire(null);
           setDeleteModalOpen(false);
-          showSnackbar("Questionário deletado com sucesso.", "success");
+          showSnackbar(
+            `Questionário ${
+              newStatus === "inativo" ? "inativado" : "ativado"
+            } com sucesso.`,
+            "success"
+          );
         })
         .catch((err) => {
-          console.error("Erro ao deletar questionário:", err);
-          showSnackbar("Erro ao deletar questionário.", "error");
+          console.error("Erro ao atualizar questionário:", err);
+          showSnackbar("Erro ao atualizar questionário.", "error");
         });
     }
   };
@@ -223,24 +131,11 @@ const QuestionnaireList = () => {
 
   const handleCreateNew = () => {
     try {
-      console.log("Navigating to create new questionnaire");
       navigate("/cadastrar-questionario");
     } catch (error) {
       console.error("Navigation error:", error);
     }
   };
-
-  // const filtered = questionnaires.filter(
-  //   (q) =>
-  //     // q.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     // q.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     // q.descricao.toLowerCase().includes(searchTerm.toLowerCase())}
-  // );
-
-  // const paginated = filtered.slice(
-  //   page * rowsPerPage,
-  //   page * rowsPerPage + rowsPerPage
-  // );
   const fetchFilteredQuestionnaires = async () => {
     if (searchTerm.trim() === "") {
       consultQuestionnaires();
@@ -300,7 +195,7 @@ const QuestionnaireList = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <ModalDeleteQuestionnaire
+      <DeactivateQuestionnaire
         open={deleteModalOpen}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
@@ -309,6 +204,7 @@ const QuestionnaireList = () => {
             ? `Questionário ${selectedQuestionnaire.id_modelo} - ${selectedQuestionnaire.nome}`
             : ""
         }
+        selectedQuestionnaire={selectedQuestionnaire}
       />
       <Box sx={{ mb: 3 }}>
         <Typography
@@ -483,7 +379,7 @@ const QuestionnaireList = () => {
                           color:
                             q.status_questionario === "ativo"
                               ? "#2E7D32"
-                              : "#757575",
+                              : "#b52222ff",
                           borderRadius: "6px",
                           fontWeight: 500,
                         }}
@@ -491,19 +387,23 @@ const QuestionnaireList = () => {
                     </TableCell>
                     <TableCell align="center">
                       <Box sx={{ display: "flex", justifyContent: "center" }}>
+                        <Switch
+                          checked={q.status_questionario === "ativo"}
+                          onChange={() => {
+                            if (q.status_questionario === "ativo") {
+                              handleDeleteClick(q);
+                            } else if (q.status_questionario === "inativo") {
+                              handleDeleteConfirm(q, "ativo");
+                            }
+                          }}
+                          color="primary"
+                        />
                         <IconButton
                           size="small"
                           color="primary"
                           onClick={() => handleEdit(q)}
                         >
                           <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteClick(q)}
-                        >
-                          <Delete fontSize="small" />
                         </IconButton>
                       </Box>
                     </TableCell>
@@ -532,4 +432,4 @@ const QuestionnaireList = () => {
   );
 };
 
-export default QuestionnaireList;
+export default ConsultQuestionnaire;
