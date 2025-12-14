@@ -54,7 +54,6 @@ const QuestionsOptions = ({
 
   return (
     <Box mt={2}>
-      {console.log(options)}
       <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
         Opções da Pergunta
       </Typography>

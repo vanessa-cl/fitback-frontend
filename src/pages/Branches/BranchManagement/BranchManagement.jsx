@@ -42,9 +42,11 @@ const BranchManagement = () => {
       .then((response) => {
         setBranches(response.data);
       })
-      .catch((error) => {
-        console.error("Erro ao buscar filiais:", error);
-        showSnackbar("Erro ao buscar filiais.", "error");
+      .catch((err) => {
+        showSnackbar(
+          err.response?.data?.error || "Erro ao buscar filiais.",
+          "error"
+        );
       })
       .finally(() => {
         setLoading(false);
@@ -61,9 +63,11 @@ const BranchManagement = () => {
       .then((res) => {
         setBranches(res.data);
       })
-      .catch((error) => {
-        console.error("Erro ao buscar filiais:", error);
-        showSnackbar("Erro ao buscar filiais.", "error");
+      .catch((err) => {
+        showSnackbar(
+          err.response?.data?.error || "Erro ao buscar filiais.",
+          "error"
+        );
       });
   };
 
@@ -162,8 +166,10 @@ const BranchManagement = () => {
         setDeactivateBranch(null);
       })
       .catch((err) => {
-        console.error("Erro ao excluir filial:", err);
-        showSnackbar("Erro ao excluir filial.", "error");
+        showSnackbar(
+          err.response?.data?.error || "Erro ao atualizar filial.",
+          "error"
+        );
       })
       .finally(() => {
         setLoading(false);

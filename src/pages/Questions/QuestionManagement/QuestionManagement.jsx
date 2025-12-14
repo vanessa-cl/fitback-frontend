@@ -50,7 +50,10 @@ const QuestionManagement = () => {
         setCategories(res.data);
       })
       .catch((err) => {
-        console.error("Erro ao carregar categorias:", err);
+        showSnackbar(
+          err.response?.data?.error || "Erro ao buscar categorias.",
+          "error"
+        );
       });
   };
 
@@ -66,7 +69,10 @@ const QuestionManagement = () => {
         setQuestions(res.data);
       })
       .catch((err) => {
-        console.error("Erro ao carregar perguntas:", err);
+        showSnackbar(
+          err.response?.data?.error || "Erro ao carregar perguntas.",
+          "error"
+        );
       })
       .finally(() => setLoading(false));
   };
@@ -82,7 +88,10 @@ const QuestionManagement = () => {
         setQuestions(res.data);
       })
       .catch((err) => {
-        console.error("Erro ao carregar perguntas por filtros:", err);
+        showSnackbar(
+          err.response?.data?.error || "Erro ao buscar perguntas.",
+          "error"
+        );
       });
   };
 
@@ -183,8 +192,10 @@ const QuestionManagement = () => {
         );
       })
       .catch((err) => {
-        console.error("Erro ao atualizar status da pergunta:", err);
-        showSnackbar("Erro ao atualizar status da pergunta", "error");
+        showSnackbar(
+          err.response?.data?.error || "Erro ao atualizar status da pergunta",
+          "error"
+        );
       })
       .finally(() => setLoading(false));
   };

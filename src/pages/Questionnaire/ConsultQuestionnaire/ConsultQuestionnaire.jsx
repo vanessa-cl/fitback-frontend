@@ -63,7 +63,10 @@ const ConsultQuestionnaire = () => {
         setQuestionnaires(res.data);
       })
       .catch((err) => {
-        console.error("Erro ao buscar questionários:", err);
+        showSnackbar(
+          err.response?.data?.error || "Erro ao buscar questionários.",
+          "error"
+        );
       });
   };
 
@@ -87,7 +90,7 @@ const ConsultQuestionnaire = () => {
         state: { questionnaire: q },
       });
     } catch (error) {
-      console.error("Navigation error:", error);
+      showSnackbar("Erro ao navegar para a edição.", "error");
     }
   };
 
@@ -118,8 +121,10 @@ const ConsultQuestionnaire = () => {
           );
         })
         .catch((err) => {
-          console.error("Erro ao atualizar questionário:", err);
-          showSnackbar("Erro ao atualizar questionário.", "error");
+          showSnackbar(
+            err.response?.data?.error || "Erro ao atualizar questionário.",
+            "error"
+          );
         });
     }
   };
@@ -133,9 +138,10 @@ const ConsultQuestionnaire = () => {
     try {
       navigate("/cadastrar-questionario");
     } catch (error) {
-      console.error("Navigation error:", error);
+      showSnackbar("Erro ao navegar para o cadastro.", "error");
     }
   };
+
   const fetchFilteredQuestionnaires = async () => {
     if (searchTerm.trim() === "") {
       consultQuestionnaires();
@@ -146,7 +152,10 @@ const ConsultQuestionnaire = () => {
           setQuestionnaires(res.data);
         })
         .catch((err) => {
-          console.error("Erro ao buscar questionários:", err);
+          showSnackbar(
+            err.response?.data?.error || "Erro ao buscar questionários.",
+            "error"
+          );
         });
     }
   };
