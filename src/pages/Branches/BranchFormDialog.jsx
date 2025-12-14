@@ -1,16 +1,13 @@
-import React from "react";
-("react");
 import {
   Box,
-  Grid,
-  Paper,
   Typography,
   TextField,
   Button,
   FormControlLabel,
   Switch,
-  InputAdornment,
   Dialog,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -23,6 +20,8 @@ import {
   SECONDARY_COLOR,
   DARK_PRIMARY,
 } from "../../utils/colors";
+import ClearIcon from "@mui/icons-material/Clear";
+import { useState } from "react";
 
 const BranchFormDialog = ({
   open,
@@ -33,10 +32,13 @@ const BranchFormDialog = ({
   handleAdd,
   handleUpdate,
   resetForm,
+  helperText,
 }) => {
-  const checkValidFields = () => {
-    const { nome, endereco, status } = currentBranch;
-    return nome.trim() !== "" && endereco.trim() !== "" && status.trim() !== "";
+  const [initialData, setInitialData] = useState(currentBranch);
+
+  const handleHasChanged = () => {
+    if (!isEditing) return false;
+    return JSON.stringify(currentBranch) !== JSON.stringify(initialData);
   };
 
   return (
@@ -85,12 +87,36 @@ const BranchFormDialog = ({
         >
           <Box sx={{ gap: 2, mb: 4, display: "flex", flexDirection: "column" }}>
             <TextField
+              id="branch-name"
+              name="branch-name"
               fullWidth
-              label="Nome da Filial"
+              label="Nome"
               value={currentBranch.nome}
               onChange={(e) =>
                 setCurrentBranch({ ...currentBranch, nome: e.target.value })
               }
+              required
+              error={!!helperText.nome}
+              helperText={helperText.nome}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() =>
+                          setCurrentBranch((prev) => ({ ...prev, nome: "" }))
+                        }
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+                htmlInput: {
+                  minLength: 3,
+                  maxLength: 100,
+                },
+              }}
             />
             <TextField
               fullWidth
@@ -101,6 +127,30 @@ const BranchFormDialog = ({
               }
               multiline
               rows={3}
+              error={!!helperText.endereco}
+              helperText={helperText.endereco}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() =>
+                          setCurrentBranch((prev) => ({
+                            ...prev,
+                            endereco: "",
+                          }))
+                        }
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+                htmlInput: {
+                  minLength: 10,
+                  maxLength: 255,
+                },
+              }}
             />
             <FormControlLabel
               control={
@@ -136,6 +186,7 @@ const BranchFormDialog = ({
                   onClick={() => {
                     onClose();
                     resetForm();
+                    setInitialData({});
                   }}
                   sx={{
                     flex: 1,
@@ -150,8 +201,8 @@ const BranchFormDialog = ({
                   variant="contained"
                   onClick={() => {
                     handleUpdate();
-                    resetForm();
                   }}
+                  disabled={!handleHasChanged()}
                   sx={{
                     flex: 1,
                     bgcolor: PRIMARY_COLOR,
@@ -169,6 +220,7 @@ const BranchFormDialog = ({
                   onClick={() => {
                     onClose();
                     resetForm();
+                    setInitialData({});
                   }}
                   sx={{
                     flex: 1,
@@ -184,7 +236,9 @@ const BranchFormDialog = ({
                 <Button
                   startIcon={<AddIcon />}
                   variant="contained"
-                  onClick={handleAdd}
+                  onClick={(e) => {
+                    handleAdd(e);
+                  }}
                   fullWidth
                   sx={{
                     py: 1.5,
@@ -193,7 +247,6 @@ const BranchFormDialog = ({
                     fontSize: "1.1rem",
                     width: "50%",
                   }}
-                  disabled={!checkValidFields()}
                 >
                   Adicionar Filial
                 </Button>

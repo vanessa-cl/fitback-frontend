@@ -29,6 +29,7 @@ const BranchManagement = () => {
   const [loading, setLoading] = useState(false);
   const { setTitle } = usePageTitle();
   const [openBranchForm, setOpenBranchForm] = useState(false);
+  const [helperText, setHelperText] = useState({});
 
   useEffect(() => {
     setTitle("Gerenciador de Filiais");
@@ -77,21 +78,31 @@ const BranchManagement = () => {
   const resetForm = () => {
     setCurrentBranch(INITIAL_FORM_STATE);
     setIsEditing(false);
+    setHelperText({});
   };
 
-  const handleAddBranch = async () => {
+  const handleAddBranch = async (e) => {
+    e.preventDefault();
     setLoading(true);
+    setHelperText({});
     await filialService
       .createFilial(currentBranch)
       .then((res) => {
-        fetchBranches();
         showSnackbar("Filial adicionada com sucesso!", "success");
-        setOpenBranchForm(false);
-        resetForm();
+        setTimeout(() => {
+          setOpenBranchForm(false);
+          fetchBranches();
+          resetForm();
+        }, 6000);
       })
       .catch((err) => {
-        console.error("Erro ao adicionar filial:", err);
-        showSnackbar("Erro ao adicionar filial.", "error");
+        if (err.response?.data?.validationErrors) {
+          return setHelperText(err.response?.data?.validationErrors);
+        }
+        showSnackbar(
+          err.response.data.error || "Erro ao adicionar filial.",
+          "error"
+        );
       })
       .finally(() => {
         setLoading(false);
@@ -103,14 +114,21 @@ const BranchManagement = () => {
     await filialService
       .updateFilial(currentBranch.id_filial, currentBranch)
       .then(() => {
-        fetchBranches();
         showSnackbar("Filial atualizada com sucesso!", "success");
-        setOpenBranchForm(false);
-        resetForm();
+        setTimeout(() => {
+          setOpenBranchForm(false);
+          resetForm();
+          fetchBranches();
+        }, 6000);
       })
       .catch((err) => {
-        console.error("Erro ao atualizar filial:", err);
-        showSnackbar("Erro ao atualizar filial.", "error");
+        if (err.response?.data?.validationErrors) {
+          return setHelperText(err.response?.data?.validationErrors);
+        }
+        showSnackbar(
+          err.response.data.error || "Erro ao atualizar filial.",
+          "error"
+        );
       })
       .finally(() => {
         setLoading(false);
@@ -189,7 +207,6 @@ const BranchManagement = () => {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
       />
-      {/* Modal de Formulário de Filial */}
       {openBranchForm ? (
         <BranchFormDialog
           open={openBranchForm}
@@ -200,12 +217,12 @@ const BranchManagement = () => {
           handleAdd={handleAddBranch}
           handleUpdate={handleUpdateBranch}
           resetForm={resetForm}
+          helperText={helperText}
         />
       ) : (
         <></>
       )}
 
-      {/* Modal de Exclusão de Filial */}
       <BranchDeleteDialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}

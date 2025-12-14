@@ -301,6 +301,7 @@ const ClientFormBase = ({
             onClick={() => {
               handleClearFields();
               setOpenFormDialog(false);
+              setInitialData({});
             }}
           >
             Cancelar
@@ -313,7 +314,7 @@ const ClientFormBase = ({
             color="primary"
             onClick={(e) => {
               e.preventDefault();
-              handleSubmit(formClient);
+              handleSubmit(e);
             }}
             disabled={!handleHasChanged()}
           >
@@ -331,6 +332,7 @@ const ClientFormBase = ({
             onClick={() => {
               handleClearFields();
               setOpenFormDialog(false);
+              setInitialData({});
             }}
           >
             Voltar
@@ -342,7 +344,10 @@ const ClientFormBase = ({
             variant="contained"
             color="primary"
             type="submit"
-            onClick={handleSubmit}
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit(e);
+            }}
           >
             Cadastrar
           </Button>
