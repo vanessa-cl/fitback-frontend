@@ -15,14 +15,15 @@ import {
   FormControl,
   TextField,
   Grid,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import ViewIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../../utils/colors";
 import { useState } from "react";
 import QuestionDetailsDialog from "../QuestionDetailsDialog/QuestionDetailsDialog.jsx";
-import QuestionDeleteDialog from "../QuestionDeleteDialog/QuestionDeleteDialog.jsx";
+import QuestionDeactivateDialog from "../QuestionDeactivateDialog/QuestionDeactivateDialog.jsx";
 import { SearchOff } from "@mui/icons-material";
 
 const QuestionConsultList = ({
@@ -31,7 +32,7 @@ const QuestionConsultList = ({
   setCurrentTab,
   categories,
   onEdit,
-  onDelete,
+  handleConfirmDeactivate,
   searchName,
   setSearchName,
   searchType,
@@ -39,16 +40,16 @@ const QuestionConsultList = ({
 }) => {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openDeactivateDialog, setOpenDeactivateDialog] = useState(false);
 
   const handleViewQuestion = (question) => {
     setSelectedQuestion(question);
     setOpenDetailsDialog(true);
   };
 
-  const handleDeleteQuestion = (question) => {
+  const handleDeactivateDialog = (question) => {
     setSelectedQuestion(question);
-    setOpenDeleteDialog(true);
+    setOpenDeactivateDialog(true);
   };
 
   return (
@@ -207,18 +208,66 @@ const QuestionConsultList = ({
                         >
                           {question.conteudo}
                         </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontSize: "0.8rem",
-                            flex: 1,
-                            color: PRIMARY_COLOR,
-                          }}
+                        <Box
+                          sx={{ display: "flex", gap: 2, alignItems: "center" }}
                         >
-                          {question.categoria || question.categoria_nome}
-                        </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontSize: "0.8rem",
+                              flex: 1,
+                              color: PRIMARY_COLOR,
+                            }}
+                          >
+                            {question.categoria || question.categoria_nome}
+                          </Typography>
+                          <Chip
+                            label={
+                              question.status_pergunta === "ativo"
+                                ? "Ativa"
+                                : "Inativa"
+                            }
+                            size="small"
+                            sx={{
+                              backgroundColor:
+                                question.status_pergunta === "ativo"
+                                  ? "#E8F5E9"
+                                  : "#F5F5F5",
+                              color:
+                                question.status_pergunta === "ativo"
+                                  ? "#2E7D32"
+                                  : "#b52222ff",
+                              borderRadius: "6px",
+                              fontWeight: 500,
+                            }}
+                          />
+                        </Box>
                       </Box>
                       <Box sx={{ display: "flex", gap: 0.5 }}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={question.status_pergunta === "ativo"}
+                              onChange={(e) => {
+                                if (question.status_pergunta === "ativo") {
+                                  handleDeactivateDialog(question, "inativo");
+                                } else {
+                                  handleConfirmDeactivate(question, "ativo");
+                                }
+                              }}
+                              sx={{
+                                "& .MuiSwitch-switchBase.Mui-checked": {
+                                  color: PRIMARY_COLOR,
+                                },
+                                "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                                  {
+                                    backgroundColor: PRIMARY_COLOR,
+                                  },
+                              }}
+                            />
+                          }
+                          sx={{ mr: 0, ml: 0, width: "100%" }}
+                        />
                         <IconButton
                           size="small"
                           onClick={() => handleViewQuestion(question)}
@@ -232,13 +281,6 @@ const QuestionConsultList = ({
                           sx={{ color: SECONDARY_COLOR }}
                         >
                           <EditIcon />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDeleteQuestion(question)}
-                          sx={{ color: "#d32f2f" }}
-                        >
-                          <DeleteIcon />
                         </IconButton>
                       </Box>
                     </Box>
@@ -278,18 +320,15 @@ const QuestionConsultList = ({
         onClose={() => setOpenDetailsDialog(false)}
         question={selectedQuestion}
       />
-      <QuestionDeleteDialog
-        open={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
+      <QuestionDeactivateDialog
+        open={openDeactivateDialog}
+        onClose={() => setOpenDeactivateDialog(false)}
         onConfirm={() => {
-          onDelete(selectedQuestion.id_pergunta);
+          handleConfirmDeactivate(selectedQuestion, "inativo");
         }}
-        title="Excluir Pergunta"
-        message="Tem certeza que deseja excluir esta pergunta?"
-        confirmText="Excluir Pergunta"
-        cancelText="Manter Pergunta"
         itemName={selectedQuestion?.conteudo}
         severity="error"
+        selectedQuestion={selectedQuestion}
       />
     </Box>
   );

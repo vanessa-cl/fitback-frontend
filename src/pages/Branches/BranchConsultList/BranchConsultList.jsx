@@ -29,8 +29,8 @@ import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../../utils/colors";
 const BranchConsultList = ({
   branches,
   handleEdit,
-  handleDeactivate,
-  handleDeactivateConfirm,
+  handleConfirmDeactivate,
+  handleDeactivateDialog,
   searchTerm,
   setSearchTerm,
 }) => {
@@ -143,30 +143,24 @@ const BranchConsultList = ({
                             gap: 1,
                           }}
                         >
-                          <Box
+                          <Chip
+                            label={
+                              branch.status === "ativo" ? "Ativa" : "Inativa"
+                            }
+                            size="small"
                             sx={{
-                              display: "flex",
-                              gap: 1,
-                              flexWrap: "wrap",
+                              backgroundColor:
+                                branch.status === "ativo"
+                                  ? "#E8F5E9"
+                                  : "#F5F5F5",
+                              color:
+                                branch.status === "ativo"
+                                  ? "#2E7D32"
+                                  : "#b52222ff",
+                              borderRadius: "6px",
+                              fontWeight: 500,
                             }}
-                          >
-                            <Chip
-                              label={
-                                branch.status === "ativo" ? "Ativa" : "Inativa"
-                              }
-                              size="small"
-                              sx={{
-                                borderColor:
-                                  branch.status === "ativo"
-                                    ? PRIMARY_COLOR
-                                    : "#ccc",
-                                color:
-                                  branch.status === "ativo"
-                                    ? PRIMARY_COLOR
-                                    : "#666",
-                              }}
-                            />
-                          </Box>
+                          />
                           <Box
                             sx={{
                               display: "flex",
@@ -180,9 +174,9 @@ const BranchConsultList = ({
                                   checked={branch.status === "ativo"}
                                   onChange={(e) => {
                                     if (branch.status === "ativo") {
-                                      handleDeactivate(branch, "inativo");
+                                      handleDeactivateDialog(branch);
                                     } else {
-                                      handleDeactivateConfirm(branch, "ativo");
+                                      handleConfirmDeactivate(branch, "ativo");
                                     }
                                   }}
                                   sx={{

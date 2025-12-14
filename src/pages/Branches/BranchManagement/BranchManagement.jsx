@@ -141,12 +141,12 @@ const BranchManagement = () => {
     setOpenBranchForm(true);
   };
 
-  const handleDeactivateBranch = (branch) => {
+  const handleDeactivateDialog = (branch) => {
     setDeactivateBranch(branch);
     setOpenDeactivateDialog(true);
   };
 
-  const handleDeactivateConfirm = async (branch, newStatus) => {
+  const handleConfirmDeactivate = async (branch, newStatus) => {
     setLoading(true);
     await filialService
       .updateFilial(branch.id_filial, { ...branch, status: newStatus })
@@ -208,8 +208,8 @@ const BranchManagement = () => {
       <BranchConsultList
         branches={branches}
         handleEdit={handleEditBranch}
-        handleDeactivateConfirm={handleDeactivateConfirm}
-        handleDeactivate={handleDeactivateBranch}
+        handleConfirmDeactivate={handleConfirmDeactivate}
+        handleDeactivateDialog={handleDeactivateDialog}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
       />
@@ -232,7 +232,7 @@ const BranchManagement = () => {
       <BranchDeactivateDialog
         open={openDeactivateDialog}
         onClose={() => setOpenDeactivateDialog(false)}
-        onConfirm={handleDeactivateConfirm}
+        onConfirm={handleConfirmDeactivate}
         branch={deactivateBranch}
       />
 

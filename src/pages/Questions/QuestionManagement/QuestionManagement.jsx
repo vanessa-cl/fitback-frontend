@@ -163,20 +163,28 @@ const QuestionManagement = () => {
       .finally(() => setLoading(false));
   };
 
-  const handleDeleteConfirm = async (id_pergunta) => {
+  const handleConfirmDeactivate = async (question, newStatus) => {
     setLoading(true);
     await perguntaService
-      .deletePergunta(id_pergunta)
+      .updatePergunta(question.id_pergunta, {
+        ...question,
+        status_pergunta: newStatus,
+      })
       .then(() => {
         setCurrentTab(0);
         setSearchName("");
         setSearchType("Todas");
         fetchQuestions();
-        showSnackbar("Pergunta excluída com sucesso!", "success");
+        showSnackbar(
+          `Pergunta ${
+            newStatus === "ativo" ? "ativada" : "inativada"
+          } com sucesso!`,
+          "success"
+        );
       })
       .catch((err) => {
-        console.error("Erro ao excluir pergunta:", err);
-        showSnackbar("Erro ao excluir pergunta", "error");
+        console.error("Erro ao atualizar status da pergunta:", err);
+        showSnackbar("Erro ao atualizar status da pergunta", "error");
       })
       .finally(() => setLoading(false));
   };
@@ -256,7 +264,7 @@ const QuestionManagement = () => {
           setCurrentTab={setCurrentTab}
           categories={categories}
           onEdit={handleEditQuestion}
-          onDelete={handleDeleteConfirm}
+          handleConfirmDeactivate={handleConfirmDeactivate}
           searchName={searchName}
           setSearchName={setSearchName}
           searchType={searchType}

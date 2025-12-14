@@ -13,19 +13,20 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 
-const QuestionDeleteDialog = ({
+const QuestionDeactivateDialog = ({
   open,
   onClose,
   onConfirm,
-  title = "Confirmar Exclusão",
-  message = "Tem certeza que deseja excluir este item?",
-  confirmText = "Excluir",
+  title = "Confirmar Inativação",
+  message = "Tem certeza que deseja inativar este item?",
+  confirmText = "Inativar",
   cancelText = "Cancelar",
   itemName = "",
   severity = "warning",
+  selectedQuestion,
 }) => {
   const handleConfirm = () => {
-    onConfirm();
+    onConfirm(selectedQuestion, "inativo");
     onClose();
   };
 
@@ -76,14 +77,6 @@ const QuestionDeleteDialog = ({
             </Typography>
           </Box>
         )}
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mt: 2, textAlign: "center" }}
-        >
-          Esta ação não pode ser desfeita.
-        </Typography>
       </DialogContent>
 
       <DialogActions sx={{ p: 3, gap: 1 }}>
@@ -98,9 +91,7 @@ const QuestionDeleteDialog = ({
         <Button
           onClick={handleConfirm}
           variant="contained"
-          color="error"
           size="large"
-          startIcon={<DeleteIcon />}
           sx={{ flex: 1 }}
         >
           {confirmText}
@@ -110,4 +101,4 @@ const QuestionDeleteDialog = ({
   );
 };
 
-export default QuestionDeleteDialog;
+export default QuestionDeactivateDialog;
