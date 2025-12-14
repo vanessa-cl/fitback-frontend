@@ -8,7 +8,7 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import { PRIMARY_COLOR, DARK_PRIMARY, SECONDARY_COLOR } from "../../utils/colors";
+import { PRIMARY_COLOR, DARK_PRIMARY, SECONDARY_COLOR } from "../../../utils/colors";
 import {
   Delete as DeleteIcon,
   Cancel as CancelIcon,

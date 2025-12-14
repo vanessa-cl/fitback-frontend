@@ -41,7 +41,7 @@ const Home = () => {
       icon: <Quiz sx={{ fontSize: 40 }} />,
       path: "/gerenciar-perguntas",
       color: theme.palette.success.main,
-      disabled: false, // Desabilitado
+      disabled: false,
     },
     {
       title: "Questionários",
@@ -65,7 +65,7 @@ const Home = () => {
       icon: <Dashboard sx={{ fontSize: 40 }} />,
       path: "/example",
       color: theme.palette.info.main,
-      disabled: true, // Desabilitado
+      disabled: true,
     },
   ];
 
@@ -116,7 +116,6 @@ const Home = () => {
                         },
                       }}
                     >
-                      {/* Badge "Disponível em breve" */}
                       {item.disabled && (
                         <Chip
                           label="Disponível em breve"
@@ -144,7 +143,6 @@ const Home = () => {
                           flexDirection: "column",
                         }}
                       >
-                        {/* Ícone */}
                         <Box
                           sx={{
                             display: "flex",
@@ -163,7 +161,6 @@ const Home = () => {
                           {item.icon}
                         </Box>
 
-                        {/* Título e Descrição */}
                         <Typography
                           variant="h5"
                           component="h2"
@@ -188,7 +185,6 @@ const Home = () => {
                           {item.description}
                         </Typography>
 
-                        {/* Botão de Ação */}
                         <Button
                           variant="contained"
                           fullWidth

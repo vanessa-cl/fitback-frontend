@@ -19,7 +19,7 @@ import {
   PRIMARY_COLOR,
   SECONDARY_COLOR,
   DARK_PRIMARY,
-} from "../../utils/colors";
+} from "../../../utils/colors";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useState } from "react";
 

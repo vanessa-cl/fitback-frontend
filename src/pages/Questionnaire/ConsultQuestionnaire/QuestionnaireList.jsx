@@ -268,7 +268,7 @@ const QuestionnaireList = () => {
 
   const totalQuestionnaires = questionnaires.length;
   const activeQuestionnaires = questionnaires.filter(
-    (q) => q.status === "Ativo"
+    (q) => q.status_questionario === "ativo"
   ).length;
 
   const metricCards = [

@@ -16,19 +16,17 @@ import {
   TextField,
   Grid,
 } from "@mui/material";
-import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import ViewIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../utils/colors";
+import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../../utils/colors";
 import { useState } from "react";
-import QuestionDetailsDialog from "./QuestionDetailsDialog";
-import QuestionDeleteDialog from "./QuestionDeleteDialog";
+import QuestionDetailsDialog from "../QuestionDetailsDialog/QuestionDetailsDialog.jsx";
+import QuestionDeleteDialog from "../QuestionDeleteDialog/QuestionDeleteDialog.jsx";
 import { SearchOff } from "@mui/icons-material";
 
 const QuestionConsultList = ({
   questions,
-  setCurrentQuestion,
   currentTab,
   setCurrentTab,
   categories,
@@ -194,7 +192,7 @@ const QuestionConsultList = ({
                         sx={{
                           display: "flex",
                           flexDirection: "column",
-                          alignItems: "flex-start", 
+                          alignItems: "flex-start",
                           gap: 1,
                           width: "100%",
                         }}
@@ -275,13 +273,11 @@ const QuestionConsultList = ({
           </Box>
         )}
       </Paper>
-      {/* Modal de Detalhes da Pergunta */}
       <QuestionDetailsDialog
         open={openDetailsDialog}
         onClose={() => setOpenDetailsDialog(false)}
         question={selectedQuestion}
       />
-      {/* Modal de Confirmação para Excluir */}
       <QuestionDeleteDialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}

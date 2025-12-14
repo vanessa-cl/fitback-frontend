@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -7,7 +6,6 @@ import {
   Button,
   Box,
   Typography,
-  Chip,
 } from "@mui/material";
 import { LIGHT_BG, SECONDARY_COLOR } from "../../../utils/colors";
 import { formatCPF, formatPhone } from "../../../utils";
@@ -31,26 +29,30 @@ const ClientDetailsDialog = ({ open, onClose, client }) => {
               variant="body1"
               sx={{ mb: 3, p: 2, bgcolor: LIGHT_BG, borderRadius: 1 }}
             >
-              {client.nome}
+              {client.nome || ""}
             </Typography>
             <Box sx={{ mb: 3, display: "flex", gap: 3 }}>
               <Box>
                 <Typography variant="body1" color="textSecondary">
                   CPF:
                 </Typography>
-                <Typography variant="body2">{formatCPF(client.cpf)}</Typography>
+                <Typography variant="body2">
+                  {formatCPF(client.cpf) || ""}
+                </Typography>
               </Box>
               <Box>
                 <Typography variant="body1" color="textSecondary">
                   Email:
                 </Typography>
-                <Typography variant="body2">{client.email}</Typography>
+                <Typography variant="body2">{client.email || ""}</Typography>
               </Box>
               <Box>
                 <Typography variant="body1" color="textSecondary">
                   Matrícula:
                 </Typography>
-                <Typography variant="body2">{client.matricula}</Typography>
+                <Typography variant="body2">
+                  {client.matricula || ""}
+                </Typography>
               </Box>
             </Box>
 
@@ -60,7 +62,7 @@ const ClientDetailsDialog = ({ open, onClose, client }) => {
                   Telefone:
                 </Typography>
                 <Typography variant="body2">
-                  {formatPhone(client.telefone)}
+                  {formatPhone(client.telefone) || ""}
                 </Typography>
               </Box>
               <Box>
@@ -68,7 +70,8 @@ const ClientDetailsDialog = ({ open, onClose, client }) => {
                   Data de Cadastro:
                 </Typography>
                 <Typography variant="body2">
-                  {new Date(client.data_cadastro).toLocaleDateString("pt-BR")}
+                  {new Date(client.data_cadastro).toLocaleDateString("pt-BR") ||
+                    ""}
                 </Typography>
               </Box>
               {client.data_desistencia ? (
@@ -79,7 +82,7 @@ const ClientDetailsDialog = ({ open, onClose, client }) => {
                   <Typography variant="body2">
                     {new Date(client.data_desistencia).toLocaleDateString(
                       "pt-BR"
-                    )}
+                    ) || ""}
                   </Typography>
                 </Box>
               ) : (

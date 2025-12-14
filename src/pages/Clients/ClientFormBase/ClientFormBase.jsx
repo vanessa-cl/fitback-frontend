@@ -1,5 +1,5 @@
 import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import { formatCPF } from "../../../utils/formatters/formatCPF.js";

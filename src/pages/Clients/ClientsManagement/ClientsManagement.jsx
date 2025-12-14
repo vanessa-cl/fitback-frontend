@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { usePageTitle } from "../../../context/PageTitleContext.jsx";
-import * as S from "./ConsultClients.styles.js";
+import * as S from "./ClientsManagement.styles.js";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Button,
@@ -24,13 +24,13 @@ import RegisterClientDialog from "../RegisterClient/RegisterClientDialog.jsx";
 import { formatCPF } from "../../../utils/index.js";
 import ClientDetailsDialog from "../ClientDetails/ClientDetailsDialog.jsx";
 
-const ConsultClients = () => {
+const ClientsManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState({});
+  const [selectedClient, setSelectedClient] = useState(null);
   const [openInactivateModal, setOpenInactivateModal] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -340,13 +340,15 @@ const ConsultClients = () => {
         setSelectedClient={setSelectedClient}
         setSnackbar={setSnackbar}
       />
-      <ClientDetailsDialog
-        open={openDetailsDialog}
-        onClose={() => setOpenDetailsDialog(false)}
-        client={selectedClient}
-      />
+      {selectedClient && (
+        <ClientDetailsDialog
+          open={openDetailsDialog}
+          onClose={() => setOpenDetailsDialog(false)}
+          client={selectedClient}
+        />
+      )}
     </S.ConsultClientsContainer>
   );
 };
 
-export default ConsultClients;
+export default ClientsManagement;

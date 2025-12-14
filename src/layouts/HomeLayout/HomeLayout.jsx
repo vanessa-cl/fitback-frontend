@@ -7,8 +7,7 @@ import {
   Container,
   useTheme
 } from "@mui/material";
-// Importe a logo - ajuste o caminho conforme sua estrutura
-import logo from "../assets/logo_fitback_horizontal.png";
+import logo from "../../assets/logo_fitback_horizontal.png";
 
 const HomeLayout = () => {
   const theme = useTheme();
@@ -25,7 +24,6 @@ const HomeLayout = () => {
         sx={{ backgroundColor: theme.palette.secondary.main }}
       >
         <Toolbar>
-          {/* Logo */}
           <Box
             component="img"
             src={logo}

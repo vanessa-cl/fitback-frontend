@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Header from "../components/Header/Header.jsx";
-import Sidebar from "../components/Sidebar/Sidebar.jsx";
-import { PageTitleProvider } from "../context/PageTitleContext.jsx";
+import Header from "../../components/Header/Header.jsx";
+import Sidebar from "../../components/Sidebar/Sidebar.jsx";
+import { PageTitleProvider } from "../../context/PageTitleContext.jsx";
 import * as S from "./DefaultLayout.styles.js";
 
 const DefaultLayout = () => {
@@ -27,7 +27,6 @@ const DefaultLayout = () => {
           </S.Main>
         </S.DefaultLayoutWrapper>
       </PageTitleProvider>
-      {/* <Footer /> */}
     </S.DefaultLayoutContainer>
   );
 };

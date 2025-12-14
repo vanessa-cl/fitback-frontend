@@ -35,20 +35,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
         </S.AccordionLabel>
         <S.AccordionItem>
           <S.AccordionLink
-            selected={activeLink === "/consultar-clientes"}
-            to="/consultar-clientes"
-            onClick={() => setActiveLink("/consultar-clientes")}
+            selected={activeLink === "/gerenciar-clientes"}
+            to="/gerenciar-clientes"
+            onClick={() => setActiveLink("/gerenciar-clientes")}
           >
-            Consultar
-          </S.AccordionLink>
-        </S.AccordionItem>
-        <S.AccordionItem>
-          <S.AccordionLink
-            selected={activeLink === "/cadastrar-cliente"}
-            to="/cadastrar-cliente"
-            onClick={() => setActiveLink("/cadastrar-cliente")}
-          >
-            Cadastrar
+            Gerenciador
           </S.AccordionLink>
         </S.AccordionItem>
       </S.SidebarAccordion>

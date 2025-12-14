@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Box, Typography, Button, Snackbar, Alert } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
-import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
-import { usePageTitle } from "../../context/PageTitleContext";
-import BranchConsultList from "./BranchConsultList";
-import filialService from "../../services/filialService";
-import BranchFormDialog from "./BranchFormDialog";
-import BranchDeleteDialog from "./BranchDeleteDialog";
+import LoadingSpinner from "../../../components/LoadingSpinner/LoadingSpinner";
+import { usePageTitle } from "../../../context/PageTitleContext";
+import BranchConsultList from "../BranchConsultList/BranchConsultList.jsx";
+import filialService from "../../../services/filialService";
+import BranchFormDialog from "../BranchFormDialog/BranchFormDialog.jsx";
+import BranchDeleteDialog from "../BranchDeleteDialog/BranchDeleteDialog.jsx";
 
 const INITIAL_FORM_STATE = {
   nome: "",

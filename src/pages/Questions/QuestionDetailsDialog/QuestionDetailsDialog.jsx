@@ -9,7 +9,7 @@ import {
   Typography,
   Chip,
 } from "@mui/material";
-import { LIGHT_BG, SECONDARY_COLOR } from "../../utils/colors";
+import { LIGHT_BG, SECONDARY_COLOR } from "../../../utils/colors";
 
 const QuestionDetailsDialog = ({ open, onClose, question }) => {
   return (

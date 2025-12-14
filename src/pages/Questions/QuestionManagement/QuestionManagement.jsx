@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { Box, Typography, Button, Snackbar, Alert } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { usePageTitle } from "../../context/PageTitleContext";
-import categoriaService from "../../services/categoriaService";
-import perguntaService from "../../services/perguntaService";
-import QuestionFormDialog from "./QuestionFormDialog";
-import QuestionConsultList from "./QuestionConsultList";
-import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
-import questionarioService from "../../services/questionarioService";
-import { SearchOff } from "@mui/icons-material";
+import { usePageTitle } from "../../../context/PageTitleContext";
+import categoriaService from "../../../services/categoriaService";
+import perguntaService from "../../../services/perguntaService";
+import QuestionFormDialog from "../QuestionFormDialog/QuestionFormDialog.jsx";
+import QuestionConsultList from "../QuestionConsultList/QuestionConsultList.jsx";
+import LoadingSpinner from "../../../components/LoadingSpinner/LoadingSpinner";
+import questionarioService from "../../../services/questionarioService";
 
 const INITIAL_QUESTION_STATE = {
   id_categoria: "",
@@ -239,7 +238,6 @@ const QuestionManagement = () => {
         spacing={4}
         sx={{ display: "flex", gap: 4, height: "100%" }}
       >
-        {/* Formulário de Adição/Edição */}
         <QuestionFormDialog
           open={openQuestionForm}
           onClose={() => setOpenQuestionForm(false)}
@@ -252,10 +250,8 @@ const QuestionManagement = () => {
           onUpdate={handleUpdateQuestion}
           helperText={helperText}
         />
-        {/*  Consulta de Perguntas */}
         <QuestionConsultList
           questions={questions}
-          setCurrentQuestion={setCurrentQuestion}
           currentTab={currentTab}
           setCurrentTab={setCurrentTab}
           categories={categories}
@@ -268,7 +264,6 @@ const QuestionManagement = () => {
         />
       </Box>
 
-      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

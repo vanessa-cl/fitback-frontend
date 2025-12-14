@@ -14,20 +14,18 @@ import {
   IconButton,
   FormHelperText,
 } from "@mui/material";
-import React, { useState, useEffect } from "react";
-import SubjectIcon from "@mui/icons-material/Subject";
-import ListIcon from "@mui/icons-material/List";
+import React from "react";
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CloseIcon from "@mui/icons-material/Close";
 import ClearIcon from "@mui/icons-material/Clear";
-import QuestionsOptions from "./QuestionsOptions";
+import QuestionsOptions from "../QuestionsOptions/QuestionsOptions";
 import {
   PRIMARY_COLOR,
   SECONDARY_COLOR,
   DARK_PRIMARY,
-} from "../../utils/colors";
+} from "../../../utils/colors";
 
 const questionTypes = [
   { value: "aberta", label: "Aberta" },

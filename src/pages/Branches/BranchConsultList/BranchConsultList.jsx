@@ -22,7 +22,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ViewIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../utils/colors";
+import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../../utils/colors";
 
 const BranchConsultList = ({
   branches,
