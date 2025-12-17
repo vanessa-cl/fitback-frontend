@@ -58,7 +58,9 @@ const QuestionManagement = () => {
   };
 
   useEffect(() => {
-    fetchCategories();
+    if (categories.length === 0) {
+      fetchCategories();
+    }
   }, []);
 
   const fetchQuestions = async () => {
@@ -77,10 +79,6 @@ const QuestionManagement = () => {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    fetchQuestions();
-  }, []);
-
   const fetchQuestionsByFilters = async (filters) => {
     await perguntaService
       .getPerguntasPorFiltros(filters)
@@ -96,16 +94,20 @@ const QuestionManagement = () => {
   };
 
   useEffect(() => {
-    if (currentTab === 0) {
+    if (currentTab === 0 && searchType === "Todas" && searchName === "") {
       fetchQuestions();
-    } else {
-      fetchQuestionsByFilters({ categoria: currentTab, tipo: searchType });
+    } else if (
+      currentTab !== 0 ||
+      searchType !== "Todas" ||
+      searchName !== ""
+    ) {
+      fetchQuestionsByFilters({
+        categoria: currentTab,
+        tipo: searchType,
+        termo: searchName,
+      });
     }
-  }, [currentTab, searchType]);
-
-  useEffect(() => {
-    fetchQuestionsByFilters({ termo: searchName, tipo: searchType });
-  }, [searchName, searchType]);
+  }, [currentTab, searchType, searchName]);
 
   const handleAddQuestion = async () => {
     setLoading(true);
@@ -226,6 +228,7 @@ const QuestionManagement = () => {
         margin: "0 auto",
       }}
     >
+      {console.log(loading)}
       {loading && <LoadingSpinner />}
       <Box
         sx={{

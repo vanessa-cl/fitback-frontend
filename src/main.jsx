@@ -6,10 +6,10 @@ import customTheme from "./styles/theme.js";
 import Router from "./routes/routes.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  // <StrictMode>
     <ThemeProvider theme={customTheme}>
       <CssBaseline />
       <Router />
     </ThemeProvider>
-  </StrictMode>
+  // </StrictMode>
 );

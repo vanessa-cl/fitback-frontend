@@ -36,6 +36,7 @@ import SearchOffIcon from "@mui/icons-material/SearchOff";
 import { usePageTitle } from "../../../context/PageTitleContext.jsx";
 import questionarioService from "../../../services/questionarioService.js";
 import DeactivateQuestionnaire from "../DeactivateQuestionnaire/DeactivateQuestionnaire.jsx";
+import LoadingSpinner from "../../../components/LoadingSpinner/LoadingSpinner.jsx";
 
 const ConsultQuestionnaire = () => {
   const [page, setPage] = useState(0);
@@ -51,12 +52,14 @@ const ConsultQuestionnaire = () => {
     message: "",
     severity: "success",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
   };
 
   const consultQuestionnaires = async () => {
+    setLoading(true);
     await questionarioService
       .getAllQuestionarios()
       .then((res) => {
@@ -67,7 +70,7 @@ const ConsultQuestionnaire = () => {
           err.response?.data?.error || "Erro ao buscar questionários.",
           "error"
         );
-      });
+      }).finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -143,6 +146,7 @@ const ConsultQuestionnaire = () => {
   };
 
   const fetchFilteredQuestionnaires = async () => {
+    setLoading(true);
     if (searchTerm.trim() === "") {
       consultQuestionnaires();
     } else {
@@ -156,7 +160,7 @@ const ConsultQuestionnaire = () => {
             err.response?.data?.error || "Erro ao buscar questionários.",
             "error"
           );
-        });
+        }).finally(() => setLoading(false));
     }
   };
 
@@ -190,6 +194,7 @@ const ConsultQuestionnaire = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      {loading && <LoadingSpinner />}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

@@ -42,7 +42,7 @@ class PerguntaService extends ApiService {
     if (tipo !== "Todas") {
       params.append("tipo", tipo);
     }
-    if (categoria !== "Todas") {
+    if (categoria !== 0 && categoria !== "Todas") {
       params.append("idCategoria", categoria);
     }
 

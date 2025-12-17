@@ -23,6 +23,7 @@ import { styles } from "./RegisterQuestionnaire.styles";
 import categoriaService from "../../../services/categoriaService.js";
 import QuestionsList from "../QuestionsList/QuestionsList.jsx";
 import perguntaService from "../../../services/perguntaService.js";
+import LoadingSpinner from "../../../components/LoadingSpinner/LoadingSpinner.jsx";
 
 const INITIAL_FORM_STATE = {
   nome: "",
@@ -50,6 +51,7 @@ const RegisterQuestionnaire = () => {
     message: "",
     severity: "info",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -61,6 +63,7 @@ const RegisterQuestionnaire = () => {
   };
 
   const fetchQuestionsByFilters = async ({ termo, categoria, tipo }) => {
+    setLoading(true);
     await perguntaService
       .getPerguntasPorFiltros({
         termo,
@@ -78,10 +81,12 @@ const RegisterQuestionnaire = () => {
             err.response?.data?.error || "Erro ao carregar dados das perguntas",
           severity: "error",
         });
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const fetchAllQuestions = async () => {
+    setLoading(true);
     await perguntaService
       .getAllPerguntas()
       .then((res) => {
@@ -95,10 +100,12 @@ const RegisterQuestionnaire = () => {
             err.response?.data?.error || "Erro ao carregar dados das perguntas",
           severity: "error",
         });
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const fetchQuestionsFromQuestionnaire = async (id) => {
+    setLoading(true);
     await questionarioService
       .getModelo(id)
       .then((res) => {
@@ -131,7 +138,8 @@ const RegisterQuestionnaire = () => {
             "Erro ao carregar dados do questionário",
           severity: "error",
         });
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const fetchCategories = async () => {
@@ -192,6 +200,7 @@ const RegisterQuestionnaire = () => {
 
   const handleAdd = async (e) => {
     e.preventDefault();
+    setLoading(true);
     await questionarioService
       .createModelo({
         nome: form.nome,
@@ -218,11 +227,15 @@ const RegisterQuestionnaire = () => {
           message: err.response.data.error || "Erro ao cadastrar questionário",
           severity: "error",
         });
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    setLoading(true);
     await questionarioService
       .updateModelo(id, {
         nome: form.nome,
@@ -248,6 +261,9 @@ const RegisterQuestionnaire = () => {
           message: err.response.data.error || "Erro ao atualizar questionário",
           severity: "error",
         });
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -258,6 +274,7 @@ const RegisterQuestionnaire = () => {
 
   return (
     <Box sx={styles.container}>
+      {loading && <LoadingSpinner />}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
