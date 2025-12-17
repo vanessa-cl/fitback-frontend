@@ -314,7 +314,7 @@ const ClientFormBase = ({
             color="primary"
             onClick={(e) => {
               e.preventDefault();
-              handleSubmit(e);
+              handleSubmit(formClient);
             }}
             disabled={!handleHasChanged()}
           >

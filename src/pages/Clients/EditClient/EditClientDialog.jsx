@@ -63,7 +63,7 @@ const EditClientDialog = ({
         }
         setSnackbar({
           open: true,
-          message: err.response.data.message || err.response.data.error,
+          message: err.response?.data?.message || "Erro ao atualizar cliente.",
           severity: "error",
         });
       });
